@@ -17,9 +17,9 @@ RUN apt-get update && apt-get install -y \
 RUN pip3 install --upgrade setuptools && pip3 install --upgrade pip
 ## install Python packages (listed in pkg.txt file)
 RUN pip3 install -r pkgs.txt
+RUN apt install python3-tk -y
 RUN pip3 install --upgrade google-cloud-bigquery
-## expose port at localhost:8888
-EXPOSE 8888 7777
+
 
 # ENTRYPOINT ["top", "-b"]
 
