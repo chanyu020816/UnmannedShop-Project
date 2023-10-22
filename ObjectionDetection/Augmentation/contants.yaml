@@ -1,0 +1,6 @@
+inp_img_pth : Input/images
+inp_lab_pth : Input/labels
+out_img_pth : AugData/images
+out_lab_pth : AugData/labels
+transformed_file_name : aug
+CLASSES : [Snacks, Test]
