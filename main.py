@@ -1,17 +1,30 @@
+import tkinter as tk
 
-from google.cloud import bigquery
-from glob import glob
-import os
-import pandas as pd
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+def show_selection():
+    # Get the selected sex
+    selected_sex = var.get()
+    print(f'Selected sex: {selected_sex}')
 
+# Create the main window
+root = tk.Tk()
+root.title("Sex Selection")
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+# Create a StringVar to hold the selected sex
+var = tk.StringVar()
 
+# Create the label for the sex selection
+sex_label = tk.Label(root, text="Select your sex:")
+sex_label.pack()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# Create Male and Female radio buttons
+male_radio = tk.Radiobutton(root, text="Male", variable=var, value="Male")
+female_radio = tk.Radiobutton(root, text="Female", variable=var, value="Female")
 
+male_radio.pack()
+female_radio.pack()
+
+# Create a button to display the selected sex
+show_button = tk.Button(root, text="Show Selection", command=show_selection)
+show_button.pack()
+
+root.mainloop()
