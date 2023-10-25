@@ -3,4 +3,4 @@ inp_lab_pth : Input/labels
 out_img_pth : AugData/images
 out_lab_pth : AugData/labels
 transformed_file_name : aug
-CLASSES : [Snacks, Test]
+CLASSES : [Bak Kut Teh Flavor Noodles, Ferrero, M-M-Peanut, Muji-SmallBiscuit, Popconcern-Sweet-Salty, Skittles]
