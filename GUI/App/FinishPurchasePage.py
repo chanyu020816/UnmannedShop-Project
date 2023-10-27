@@ -1,7 +1,7 @@
 import tkinter as tk
 from PIL import ImageTk, Image
 import tkinter.messagebox
-from ImageConvertResult import LoginPageBg
+from ImageConvertResult import FinishPurchasePageBg
 import base64
 from io import BytesIO
 from sys import platform
@@ -17,7 +17,7 @@ class FinishPurchasePage(tk.Frame):
         tk.Frame.__init__(self, parent, bg="#040405")
         self.window = parent
         self.controller = controller
-        byte_data = base64.b64decode(LoginPageBg)
+        byte_data = base64.b64decode(FinishPurchasePageBg)
         image_data = BytesIO(byte_data)
 
         self.bg_frame = Image.open(image_data)
@@ -37,6 +37,19 @@ class FinishPurchasePage(tk.Frame):
         self.create_finish_purchase_page()
 
     def create_finish_purchase_page(self):
-        # ... Your create account page code ...
-        back_to_login_button = tk.Button(self, text="Back to Login", command=self.controller.show_login_page)
-        back_to_login_button.place(x=100, y=100)
+        ## TITLE ##
+        FinishPurchase_Title = tk.Label(self, text="Purchase   Completed", font=("Canva Sans", 35, "bold"),
+            bg="#FFF3F3", fg="#545454")
+        FinishPurchase_Title.place(x=520, y=285)
+
+        keep_purchase_button = Button(self, text="Continue   Purchasing", command=self.controller.show_object_detection_page,
+            padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"), activebackground="#FF3A3A",
+            activeforeground="white", fg="white", highlightthickness=0, borderwidth=0, highlightcolor="#FFF3F3",
+            highlightbackground="#FFF3F3", width=250)
+        keep_purchase_button.place(x=440, y=400)
+
+        done_purchase_button = Button(self, text="Done   Purchasing", command=self.controller.show_done_purchase_page,
+            padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"), activebackground="#FF3A3A",
+            activeforeground="white", fg="white", highlightthickness=0, borderwidth=0, highlightcolor="#FFF3F3",
+            highlightbackground="#FFF3F3", width=250)
+        done_purchase_button.place(x=720, y=400)
