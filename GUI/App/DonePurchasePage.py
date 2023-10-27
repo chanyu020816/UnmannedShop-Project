@@ -34,18 +34,11 @@ class DonePurchasePage(tk.Frame):
         self.grid_propagate(False)
         self.grid()
 
-        self.status = 0
-
         self.create_done_purchase_page()
+
 
     def create_done_purchase_page(self):
 
         UserLogin_Title = tk.Label(self, text="Return  to  Login  after  15  seconds...",
             font=("Canva Sans", 30, "bold"), bg="#FFF3F3", fg="#545454")
         UserLogin_Title.place(x=450, y=210)
-        self.returnLoginPage()
-
-    def returnLoginPage(self):
-        sec = 15
-
-        self.after(sec * 1000, self.controller.show_login_page)
