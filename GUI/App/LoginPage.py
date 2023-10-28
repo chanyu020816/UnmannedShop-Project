@@ -54,6 +54,7 @@ class LoginPage(tk.Frame):
         self.username_status = 0
         self.password_status = 0
         self.detect_status = 0
+        self.nofaceLabel = None
 
         # set up the frame's dimensions
         self.configure(width=1400, height=800)
@@ -71,20 +72,24 @@ class LoginPage(tk.Frame):
     def create_login_page(self):
 
         ## TITLE ##
-        UserLogin_Title = tk.Label(self, text = "User    Login", font=("Canva Sans", 35, "bold"), bg="#FFF3F3", fg="#4f4e4d")
+        UserLogin_Title = tk.Label(self, text = "User    Login", font=("Canva Sans", 35, "bold"),
+            bg="#FFF3F3", fg="#4f4e4d")
         UserLogin_Title.place(x=970, y=140)
 
         ## FaceRecog TITLE ##
-        FaceRecog_Title = tk.Label(self, text="Facial    Login", font=("Canva Sans", 30, "bold"), bg="#FFFFFF",
-                                   fg="#4f4e4d")
+        FaceRecog_Title = tk.Label(self, text="Facial    Login", font=("Canva Sans", 30, "bold"),
+            bg="#FFFFFF", fg="#4f4e4d")
         FaceRecog_Title.place(x=280, y=170)
         canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth = 0, border=0, relief="solid", width = 350, highlightthickness=0)
         canvas.place(x=180, y=220)
 
         self.UnDetectedLabel = tk.Label(self, text="In the process of facial recognition...",
                                         font=("yu gothic ui", 21, "bold"), bg="#FFFFFF", fg="#4f4e4d")
-        if self.detect_status == 0:
-            self.UnDetectedLabel.place(x=185, y=550)
+        self.nofaceLabel = tk.Label(self, text="No face detected.",
+                                        font=("yu gothic ui", 21, "bold"), bg="#FFFFFF", fg="#4f4e4d")
+        self.nofaceLabel.place(x=185, y=530)
+        #if self.detect_status == 0:
+        #    self.UnDetectedLabel.place(x=185, y=550)
 
         ## USERNAME ##
         username_label = tk.Label(self, text="Username / Email", bg="#FFF3F3", fg="#4f4e4d",
@@ -172,11 +177,12 @@ class LoginPage(tk.Frame):
                 if self.detect_status == 1:
                     self.FaceDetectUserID.place_forget()
                     self.FaceDetectUserName.place_forget()
-                    self.UnDetectedLabel.place(x=185, y=550)
+                    # self.UnDetectedLabel.place(x=185, y=550)
                     self.detect_status = 0
                     self.username_status = 0
                     self.password_status = 0
-                # self.UnDetectedLabel.place_forget()
+                self.UnDetectedLabel.place_forget()
+
             else:
                 self.password_error = tk.Label(self, text="Incorrect password, please try again.", bg="#FFF3F3",
                                           fg="red", font=("Open Sans", 18))
@@ -201,56 +207,64 @@ class LoginPage(tk.Frame):
             imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
             faceCurFrame = face_recognition.face_locations(imgS)
             encodeCurFrame = face_recognition.face_encodings(imgS, faceCurFrame)
+            if len(faceCurFrame) == 0:
+                if self.detect_status == 0:
+                    self.nofaceLabel.place(x=185, y=530)
+                    if self.UnDetectedLabel:
+                        self.UnDetectedLabel.place_forget()
+            else:
+                for encodeFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
+                    matches = face_recognition.compare_faces(encodeListKnow, encodeFace, tolerance=0.35)
+                    faceDis = face_recognition.face_distance(encodeListKnow, encodeFace)
 
-            for encodeFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
-                # matches = face_recognition.compare_faces(encodeListKnow, encodeFace)
-                faceDis = face_recognition.face_distance(encodeListKnow, encodeFace)
-
-                matchIndex = argmin(faceDis)
-                if IDs[matchIndex]:
-                    image_name = IDs[matchIndex].split("!@#$%")[0]
                     y1, x2, y2, x1 = faceLoc
                     y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
                     bbox = x1, y1, x2 - x1, y2 - y1
                     img_t = cvzone.cornerRect(flipped_frame, bbox, rt=0)
                     img = Image.fromarray(img_t)
                     img = img.resize((video_width, video_height), Image.ANTIALIAS)
-                    self.UnDetectedLabel.place_forget()
+                    if any(matches):
+                        matchIndex = argmin(faceDis)
+                        image_name = IDs[matchIndex].split("!@#$%")[0]
+                        self.nofaceLabel.place_forget()
+                        self.UnDetectedLabel.place_forget()
 
-                    # if this is the first time detected
-                    if self.detect_status == 0:
-                        query = f"SELECT user_id FROM unmannedshop.TestUserInfoFull WHERE username = '{image_name}';"
+                        # if this is the first time detected
+                        if self.detect_status == 0:
+                            query = f"SELECT user_id FROM unmannedshop.TestUserInfoFull WHERE username = '{image_name}';"
 
-                        query_job = self.client.query(query)
-                        result = query_job.result()
-                        for row in result:
-                            self.FDuserid = row.user_id
-                        self.FaceDetectUserID = tk.Label(self, text=f"User ID:  {self.FDuserid}",
-                                                    font=("yu gothic ui", 21, "bold"),
-                                                    bg="#FFFFFF", fg="#000000")
-                        self.FaceDetectUserID.place(x=185, y=530)
+                            query_job = self.client.query(query)
+                            result = query_job.result()
+                            for row in result:
+                                self.FDuserid = row.user_id
+                            self.FaceDetectUserID = tk.Label(self, text=f"User ID:  {self.FDuserid}",
+                                                        font=("yu gothic ui", 21, "bold"),
+                                                        bg="#FFFFFF", fg="#4f4e4d")
+                            self.FaceDetectUserID.place(x=185, y=530)
 
-                        self.FDusername = "UnDetected"
-                        self.FaceDetectUserName = tk.Label(self, text=f"User Name:  {image_name}",
-                                                       font=("yu gothic ui", 21, "bold"),
-                                                       bg="#FFFFFF", fg="#000000")
-                        self.FaceDetectUserName.place(x=185, y=565)
-                        self.detect_status = 1
-                    if self.username_status == 0:
-                        self.username_entry.delete(0, 'end')
-                        self.username_entry.insert(0, image_name)
-                        self.username_status = 1
-                    if self.password_status == 0:
-                        self.password_entry.delete(0, 'end')
-                        query = f"SELECT password FROM unmannedshop.TestUserInfoFull WHERE username = '{image_name}';"
+                            self.FDusername = "UnDetected"
+                            self.FaceDetectUserName = tk.Label(self, text=f"User Name:  {image_name}",
+                                                           font=("yu gothic ui", 21, "bold"),
+                                                           bg="#FFFFFF", fg="#4f4e4d")
+                            self.FaceDetectUserName.place(x=185, y=565)
+                            self.detect_status = 1
+                        if self.username_status == 0:
+                            self.username_entry.delete(0, 'end')
+                            self.username_entry.insert(0, image_name)
+                            self.username_status = 1
+                        if self.password_status == 0:
+                            self.password_entry.delete(0, 'end')
+                            query = f"SELECT password FROM unmannedshop.TestUserInfoFull WHERE username = '{image_name}';"
 
-                        query_job = self.client.query(query)
-                        result = query_job.result()
-                        for row in result:
-                            true_password = row.password
-                        self.password_entry.insert(0, true_password)
-                        self.password_status = 1
-
+                            query_job = self.client.query(query)
+                            result = query_job.result()
+                            for row in result:
+                                true_password = row.password
+                            self.password_entry.insert(0, true_password)
+                            self.password_status = 1
+                    elif self.detect_status == 0:
+                        self.nofaceLabel.place_forget()
+                        self.UnDetectedLabel.place(x=185, y=550)
             photo = ImageTk.PhotoImage(image=img)
             canvas.photo = photo
 
@@ -271,12 +285,14 @@ class LoginPage(tk.Frame):
             # if self.FaceDetectUserID:
             self.FaceDetectUserID.place_forget()
             self.FaceDetectUserName.place_forget()
-            self.UnDetectedLabel.place(x=185, y=550)
             self.detect_status = 0
             self.username_status = 0
             self.password_status = 0
+        self.UnDetectedLabel.place_forget()
         self.username_entry.delete(0, 'end')
         self.password_entry.delete(0, 'end')
+        self.user_not_found_label.place_forget()
+        self.password_error.place_forget()
 
     def toCreateAccountPage(self):
         self.resetFD()
