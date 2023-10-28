@@ -16,3 +16,4 @@ if __name__ == '__main__':
     pic2str('./images/ObjectDetectionPageBg.png', 'ObjectDetectionBg')
     pic2str('./images/LoginFaceDetectPageBg.png', 'LoginFaceDetectPageBg')
     pic2str('./images/DonePurchasePageBg.png', 'DonePurchasePageBg')
+    pic2str('./images/FinishPurchasePageBg.png', 'FinishPurchasePageBg')
