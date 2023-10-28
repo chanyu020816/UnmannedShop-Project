@@ -13,12 +13,13 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 import uuid
 from constant import *
+import constant
 import cv2
 import cvzone
 import face_recognition
 import pickle
 from numpy import argmin
-
+import ObjectDetectionPage
 # set up webcam
 cap = cv2.VideoCapture(0)
 # load face images encode file
@@ -26,6 +27,7 @@ file = open("./EncodeFile.p", "rb")
 encodeListwithIDs = pickle.load(file)
 encodeListKnow, IDs = encodeListwithIDs
 file.close()
+
 
 class LoginPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -50,16 +52,20 @@ class LoginPage(tk.Frame):
         # set up parameters
         self.user_not_found_label = None
         self.password_error = None
-        self.FaceDetectUserID = None
+        #self.FaceDetectUserID = None
         self.username_status = 0
         self.password_status = 0
         self.detect_status = 0
         self.nofaceLabel = None
+        self.running_show_frame = True
 
         # set up the frame's dimensions
         self.configure(width=1400, height=800)
         self.grid_propagate(False)
         self.grid()
+
+        self.final_user_name_var = tk.StringVar()
+        self.final_user_name_var.set('')
 
         # DataBase connection
         credentials = service_account.Credentials.from_service_account_file('./unmannedshop-3444ca55864c.json')
@@ -80,7 +86,7 @@ class LoginPage(tk.Frame):
         FaceRecog_Title = tk.Label(self, text="Facial    Login", font=("Canva Sans", 30, "bold"),
             bg="#FFFFFF", fg="#4f4e4d")
         FaceRecog_Title.place(x=280, y=170)
-        canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth = 0, border=0, relief="solid", width = 350, highlightthickness=0)
+        canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth=0, border=0, relief="solid", width=350, highlightthickness=0)
         canvas.place(x=180, y=220)
 
         self.UnDetectedLabel = tk.Label(self, text="In the process of facial recognition...",
@@ -97,8 +103,7 @@ class LoginPage(tk.Frame):
         username_label.place(x = 780, y = 210)
         username = tk.StringVar()
         self.username_entry = tk.Entry(self, highlightthickness=0, relief='flat', bg="#F89B9B", fg="#000000",
-                                    font=("Helvetica", 18, "bold"), insertbackground = '#6b6a69', borderwidth=7,
-                                    textvariable = username)
+            font=("Helvetica", 18, "bold"), insertbackground = '#6b6a69', borderwidth=7, textvariable=username)
         self.username_entry.place(x=780, y=250, width=550, height=30)
 
         ## PASSWORD ##
@@ -139,19 +144,20 @@ class LoginPage(tk.Frame):
         # if "@" in the username_input, it is email
         if "@" in username_input:
             # search by email
-            query = f"SELECT password FROM unmannedshop.TestUserInfoFull WHERE email = '{username_input}';"
+            ps_query = f"SELECT * FROM unmannedshop.TestUserInfoFull WHERE email = '{username_input}';"
         else:
+            # final_user_name = username_input
             # search by username
-            query = f"SELECT password FROM unmannedshop.TestUserInfoFull WHERE username = '{username_input}';"
+            ps_query = f"SELECT * FROM unmannedshop.TestUserInfoFull WHERE username = '{username_input}';"
 
-        query_job = self.client.query(query)
-        result = query_job.result()
+        ps_query_job = self.client.query(ps_query)
+        ps_result = ps_query_job.result()
 
         # if username/email not found
         user_not_foundps = uuid.uuid1()
         true_password = str(user_not_foundps) + SECRET_CODE
 
-        if result.total_rows == 0:
+        if ps_result.total_rows == 0:
             # check if the "User not found" label already exists and forget it
             if self.user_not_found_label:
                 self.user_not_found_label.place_forget()
@@ -162,18 +168,25 @@ class LoginPage(tk.Frame):
             # clear the "User not found" label if it exists
             if self.user_not_found_label:
                 self.user_not_found_label.place_forget()
-            for row in result:
+            for row in ps_result:
                 true_password = row.password
+                final_user_name = row.username
+                final_user_ID = str(row.user_id)
 
         if true_password != str(user_not_foundps) + SECRET_CODE:
             if password_input == true_password:
+
+                global login_user_name
+                login_user_name = final_user_name
+                global login_user_ID
+                login_user_ID = final_user_ID
                 self.controller.show_object_detection_page()
                 if self.password_error:
                     self.password_error.place_forget()
                 # If correctly login, remove password
                 # self.username_entry.delete(0, 'end')
                 self.password_entry.delete(0, 'end')
-
+                # ObjectDetectionPage.ObjectDetectionPage(tk.Frame).test(self)
                 if self.detect_status == 1:
                     self.FaceDetectUserID.place_forget()
                     self.FaceDetectUserName.place_forget()
@@ -189,6 +202,8 @@ class LoginPage(tk.Frame):
                 self.password_error.place(x=783, y=360)
 
     def show_frame(self, canvas):
+        if not self.running_show_frame:
+            return
         self.image_id = 0  # inform function to assign new value to global variable instead of local variable
         # get frame
         ret, frame = cap.read()
@@ -288,12 +303,18 @@ class LoginPage(tk.Frame):
             self.detect_status = 0
             self.username_status = 0
             self.password_status = 0
-        self.UnDetectedLabel.place_forget()
+            self.UnDetectedLabel.place_forget()
         self.username_entry.delete(0, 'end')
         self.password_entry.delete(0, 'end')
-        self.user_not_found_label.place_forget()
-        self.password_error.place_forget()
+        if self.user_not_found_label:
+            self.user_not_found_label.place_forget()
+        if self.password_error:
+            self.password_error.place_forget()
 
     def toCreateAccountPage(self):
         self.resetFD()
+        # self.stop_show_frame()
         self.controller.show_create_account_page()
+
+    def stop_show_frame(self):
+        self.running_show_frame = False
