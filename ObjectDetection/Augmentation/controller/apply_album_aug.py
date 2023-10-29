@@ -7,7 +7,7 @@ import albumentations as A
 def apply_aug(image, bboxes, out_lab_pth, out_img_pth, transformed_file_name, classes):
 
     transform = A.Compose([
-        A.RandomCrop(width=550, height=550),
+        #A.RandomCrop(width=550, height=550),
         A.HorizontalFlip(p=0.5),
         A.RandomBrightnessContrast(p=0.2),
         A.RandomGamma(p=0.2),

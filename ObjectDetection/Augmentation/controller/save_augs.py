@@ -12,7 +12,7 @@ def save_aug_lab(transformed_bboxes, lab_pth, lab_name):
         else:
             for bbox in transformed_bboxes:
                 updated_bbox = str(bbox).replace(',', '').replace('[', '').replace(']', '')
-                output.write(updated_bbox, "\n")
+                output.write(updated_bbox + "\n")
 
 
 def save_aug_image(transformed_image, out_img_pth, img_name):    

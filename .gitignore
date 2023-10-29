@@ -6,3 +6,4 @@
 *.json
 /GUI/App/constant.py
 Compile
+*.p

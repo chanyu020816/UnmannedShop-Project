@@ -45,7 +45,7 @@ while True:
             color = color_list[cls]
             thickness = 2
 
-            cv2.putText(img, class_list[cls], org, font, fontScale, color, thickness)
+            cv2.putText(img, class_list[cls], org, font, fontScale, (255, 0, 255), thickness)
 
     cv2.imshow('Webcam', img)
     if cv2.waitKey(1) == ord('q'):

@@ -14,11 +14,11 @@ def run_pipeline():
 
     for img_file in imgs:   
         file_name = img_file.split('.jpg')[0]
-        print(img_file)
         image = cv2.imread(os.path.join(CONSTANTS["inp_img_pth"], img_file))           
         lab_pth = os.path.join(CONSTANTS["inp_lab_pth"], file_name + '.txt')                                
         album_bboxes = get_bboxes_list(lab_pth, CONSTANTS['CLASSES'])
-        for x in range(30):
+        for x in range(20):
             aug_file_name = file_name + "_" + CONSTANTS["transformed_file_name"] + str(x)
             apply_aug(image, album_bboxes, CONSTANTS["out_lab_pth"],  CONSTANTS["out_img_pth"], aug_file_name, CONSTANTS['CLASSES'])
-        time.sleep(5)
+        time.sleep(2)
+        print(img_file, "Complete")

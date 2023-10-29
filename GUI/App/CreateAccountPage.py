@@ -161,7 +161,8 @@ class CreateAccountPage(tk.Frame):
             self.email_check_error.place(x=1080, y=215)
             return ""
         else:
-            self.email_check_error.place_forget()
+            if self.email_check_error:
+                self.email_check_error.place_forget()
 
         ### if username already exists ###
         username_check_query = f""" \
@@ -181,7 +182,8 @@ class CreateAccountPage(tk.Frame):
             self.username_check_error.place(x=1030, y=295)
             return ""
         else:
-            self.username_check_error.place_forget()
+            if self.username_check_error:
+                self.username_check_error.place_forget()
 
         if password_input != password_check_input:
             if self.password_check_error:

@@ -76,7 +76,6 @@ class LoginPage(tk.Frame):
         self.create_login_page()
 
     def create_login_page(self):
-
         ## TITLE ##
         UserLogin_Title = tk.Label(self, text = "User    Login", font=("Canva Sans", 35, "bold"),
             bg="#FFF3F3", fg="#4f4e4d")
@@ -86,8 +85,8 @@ class LoginPage(tk.Frame):
         FaceRecog_Title = tk.Label(self, text="Facial    Login", font=("Canva Sans", 30, "bold"),
             bg="#FFFFFF", fg="#4f4e4d")
         FaceRecog_Title.place(x=280, y=170)
-        canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth=0, border=0, relief="solid", width=350, highlightthickness=0)
-        canvas.place(x=180, y=220)
+        self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth=0, border=0, relief="solid", width=350, highlightthickness=0)
+        self.canvas.place(x=180, y=220)
 
         self.UnDetectedLabel = tk.Label(self, text="In the process of facial recognition...",
                                         font=("yu gothic ui", 21, "bold"), bg="#FFFFFF", fg="#4f4e4d")
@@ -134,7 +133,19 @@ class LoginPage(tk.Frame):
             highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=250, height=40)
         resetFD_button.place(x=235, y=600)
         # start the video capture
-        self.show_frame(canvas)
+        #test_button = Button(self, text="Reset", command=self.stop_show_frame,
+        #    padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"),
+        #    activebackground="#FF3A3A", activeforeground="white", fg="white", highlightthickness=0, borderwidth=0,
+        #    highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=250, height=40)
+        #test_button.place(x=235, y=50)
+
+        #test2_button = Button(self, text="Reset", command=self.resume_show_frame,
+        #     padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"),
+        #     activebackground="#FF3A3A", activeforeground="white", fg="white", highlightthickness=0,
+        #     borderwidth=0,
+        #     highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=250, height=40)
+        #test2_button.place(x=505, y=50)
+        self.show_frame(self.canvas)
 
     def submit(self, username, password):
         username_input = username.get()
@@ -181,6 +192,7 @@ class LoginPage(tk.Frame):
                 global login_user_ID
                 login_user_ID = final_user_ID
                 self.controller.show_object_detection_page()
+                self.stop_show_frame()
                 if self.password_error:
                     self.password_error.place_forget()
                 # If correctly login, remove password
@@ -202,6 +214,8 @@ class LoginPage(tk.Frame):
                 self.password_error.place(x=783, y=360)
 
     def show_frame(self, canvas):
+        #if status.get() == "stop":
+        #    return
         if not self.running_show_frame:
             return
         self.image_id = 0  # inform function to assign new value to global variable instead of local variable
@@ -211,6 +225,7 @@ class LoginPage(tk.Frame):
         video_height = 300
 
         if ret:
+            # print(uuid.uuid1())
             # cv2 uses `BGR` but `GUI` needs `RGB
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             flipped_frame = cv2.flip(frame, 1)
@@ -313,8 +328,14 @@ class LoginPage(tk.Frame):
 
     def toCreateAccountPage(self):
         self.resetFD()
-        # self.stop_show_frame()
+        self.stop_show_frame()
         self.controller.show_create_account_page()
 
     def stop_show_frame(self):
         self.running_show_frame = False
+        self.canvas.place_forget()
+
+    def resume_show_frame(self):
+        self.running_show_frame = True
+        self.show_frame(self.canvas)
+        self.canvas.place(x=180, y=220)
