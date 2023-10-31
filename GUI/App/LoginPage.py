@@ -58,6 +58,8 @@ class LoginPage(tk.Frame):
         self.detect_status = 0
         self.nofaceLabel = None
         self.running_show_frame = True
+        self.detecttime = 0
+        self.unknowLabel = None
 
         # set up the frame's dimensions
         self.configure(width=1400, height=800)
@@ -93,6 +95,9 @@ class LoginPage(tk.Frame):
         self.nofaceLabel = tk.Label(self, text="No face detected.",
                                         font=("yu gothic ui", 21, "bold"), bg="#FFFFFF", fg="#4f4e4d")
         self.nofaceLabel.place(x=185, y=530)
+
+        self.unknownLabel = tk.Label(self, text="Unknown User. Please register first.",
+                                        font=("yu gothic ui", 21, "bold"), bg="#FFFFFF", fg="#4f4e4d")
         #if self.detect_status == 0:
         #    self.UnDetectedLabel.place(x=185, y=550)
 
@@ -242,6 +247,8 @@ class LoginPage(tk.Frame):
                     self.nofaceLabel.place(x=185, y=530)
                     if self.UnDetectedLabel:
                         self.UnDetectedLabel.place_forget()
+                    if self.unknownLabel:
+                        self.unknownLabel.place_forget()
             else:
                 for encodeFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
                     matches = face_recognition.compare_faces(encodeListKnow, encodeFace, tolerance=0.35)
@@ -254,11 +261,13 @@ class LoginPage(tk.Frame):
                     img = Image.fromarray(img_t)
                     img = img.resize((video_width, video_height), Image.ANTIALIAS)
                     if any(matches):
+                        self.detecttime = 0
                         matchIndex = argmin(faceDis)
                         image_name = IDs[matchIndex].split("!@#$%")[0]
                         self.nofaceLabel.place_forget()
                         self.UnDetectedLabel.place_forget()
-
+                        if self.unknownLabel:
+                            self.unknownLabel.place_forget()
                         # if this is the first time detected
                         if self.detect_status == 0:
                             query = f"SELECT user_id FROM unmannedshop.TestUserInfoFull WHERE username = '{image_name}';"
@@ -293,8 +302,13 @@ class LoginPage(tk.Frame):
                             self.password_entry.insert(0, true_password)
                             self.password_status = 1
                     elif self.detect_status == 0:
+                        self.detecttime += 1
                         self.nofaceLabel.place_forget()
                         self.UnDetectedLabel.place(x=185, y=550)
+                        if self.detecttime >= 30:
+                            self.unknownLabel.place(x=185, y=550)
+                            if self.UnDetectedLabel:
+                                self.UnDetectedLabel.place_forget()
             photo = ImageTk.PhotoImage(image=img)
             canvas.photo = photo
 
@@ -318,6 +332,7 @@ class LoginPage(tk.Frame):
             self.detect_status = 0
             self.username_status = 0
             self.password_status = 0
+            self.detecttime = 0
             self.UnDetectedLabel.place_forget()
         self.username_entry.delete(0, 'end')
         self.password_entry.delete(0, 'end')
@@ -325,6 +340,8 @@ class LoginPage(tk.Frame):
             self.user_not_found_label.place_forget()
         if self.password_error:
             self.password_error.place_forget()
+        if self.unknowLabel:
+            self.unknowLabel.place_forget()
 
     def toCreateAccountPage(self):
         self.resetFD()
