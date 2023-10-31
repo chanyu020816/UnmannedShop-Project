@@ -16,7 +16,12 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 from constant import *
 import datetime
-
+from AddFaceEncode import EncodeImages
+import cv2
+import cvzone
+cap = cv2.VideoCapture(0)
+import random
+from face_recognition import face_locations
 class CreateAccountPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg="#040405")
@@ -39,6 +44,11 @@ class CreateAccountPage(tk.Frame):
         self.username_check_error = None
         self.password_check_error = None
         self.birthdate_check_error = None
+        self.captured_image = None
+        self.capture_result = None
+        self.capturing = False
+        self.running_capture_photo_frame = False
+        self.retake_button = None
 
         # Set up the frame's dimensions
         self.configure(width=1400, height=800)
@@ -53,6 +63,27 @@ class CreateAccountPage(tk.Frame):
         style.configure("TCombobox", fieldbackground="#F89B9B", foreground="#000000",
             selectforeground="#000000", selectbackground="#F89B9B", padx=30, padding = "#000000")
 
+        CaptureFace_Title = tk.Label(self, text="Facial Photograph (for Face Recog)", font=("Canva Sans", 25, "bold"),
+                                      bg="#FFF3F3", fg="#4f4e4d")
+        CaptureFace_Title.place(x=150, y=100)
+        self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth=0, border=0, relief="solid", width=350,
+                                highlightthickness=0)
+        # self.canvas.place(x=50, y=150)
+
+        self.TakePict_button = Button(self, text="Take   Photo", command=self.capture,
+            padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 23, "bold"),
+            activebackground="#FF3A3A", activeforeground="white", fg="white",
+            highlightthickness=0,
+            borderwidth=0,
+            highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=400, height=55)
+        self.TakePict_button.place(x=150, y=640)
+
+        self.retake_button = Button(self, text="Retake   Photo", command=self.retake,
+            padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 23, "bold"),
+            activebackground="#FF3A3A", activeforeground="white", fg="white",
+            highlightthickness=0,
+            borderwidth=0,
+            highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=400, height=55)
 
         ## TITLE ##
         UserLogin_Title = tk.Label(self, text = "Create    Account", font=("Canva Sans", 35, "bold"), bg="#FFF3F3", fg="#FF3A3A")
@@ -117,7 +148,8 @@ class CreateAccountPage(tk.Frame):
                                    textvariable=birthdate)
         self.birthdate_entry.place(x=780, y=580, width=550, height=30)
 
-        BacktoLogin_button = Button(self, text="Back to Login", command=self.controller.show_login_page, padx=10,
+
+        BacktoLogin_button = Button(self, text="Back to Login", command=self.controller.show_object_detection_page, padx=10,
             pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"), activebackground="#FF3A3A",
             activeforeground = "#FF3A3A", fg="white", highlightthickness=0, borderwidth=0, highlightcolor="#FFF3F3",
             highlightbackground="#FFF3F3", width = 250)
@@ -221,6 +253,7 @@ class CreateAccountPage(tk.Frame):
             '{password_input}' AS password, '{sex_input}' AS Sex, DATE('{birthdate_input}') AS BirthDate, \
             DATE('{today}') AS registration_date; \
             """
+
             create_new_query_job = client.query(create_new_query)
 
             self.email_entry.delete(0, 'end')
@@ -229,7 +262,8 @@ class CreateAccountPage(tk.Frame):
             self.password_check_entry.delete(0, 'end')
             self.sex_combobox.set('')
             self.birthdate_entry.delete(0, 'end')
-            self.after(5000, self.controller.show_login_page())
+            EncodeImages(username_input)
+            self.after(5000, self.controller.AfterSignUpAccount_show_login_page())
 
 
     def is_valid_bigquery_date(self, input_date):
@@ -238,3 +272,87 @@ class CreateAccountPage(tk.Frame):
             return False
         except ValueError:
             return True
+
+    def show_frame(self, canvas):
+
+        if not self.running_capture_photo_frame:
+            return
+
+        self.image_id = 0  # inform function to assign new value to global variable instead of local variable
+
+        if self.captured_image is None:
+            # get frame
+            ret, frame = cap.read()
+            # Set the desired capture width and height
+            video_width = 480
+            video_height = 480
+
+            if ret:
+
+                # cv2 uses `BGR` but `GUI` needs `RGB
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                flipped_frame = cv2.flip(frame, 1)
+                # convert to PIL image
+                img = Image.fromarray(flipped_frame)
+                img = img.resize((video_width, video_height), Image.ANTIALIAS)
+                imgS = cv2.resize(flipped_frame, (0, 0), None, 0.25, 0.25)
+                imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
+                faceCurFrame = face_locations((imgS))
+
+                for faceLoc in faceCurFrame:
+                    y1, x2, y2, x1 = faceLoc
+                    y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
+                    bbox = x1, y1, x2 - x1, y2 - y1
+                    img_t = cvzone.cornerRect(flipped_frame, bbox, rt=0)
+                    img = Image.fromarray(img_t)
+                    img = img.resize((video_width, video_height), Image.ANTIALIAS)
+
+                photo = ImageTk.PhotoImage(image=img)
+                # solution for bug in `PhotoImage`
+                self.canvas.photo = photo
+
+                if self.image_id:
+                    # replace image in PhotoImage on canvas
+                    canvas.itemconfig(self.image_id, image=photo)
+                else:
+                    # create first image on canvas and keep its ID
+                    self.image_id = canvas.create_image((0, 0), image=photo, anchor='nw')
+                    # resize canvas
+                    canvas.configure(width=photo.width(), height=photo.height())
+
+                # run again after 20ms (0.02s)
+                self.after(20, self.show_frame, canvas)
+
+    def capture(self):
+        self.capturing = True
+
+        # Capture a frame
+        ret, frame = cap.read()
+        if ret:
+            flipped_frame = cv2.flip(frame, 1)
+            # Convert the captured frame to a PhotoImage
+            img = cv2.cvtColor(flipped_frame, cv2.COLOR_BGR2RGB)
+
+            cv2.imwrite(f"./new_faces_images/new.jpg", flipped_frame)
+
+            self.captured_image = ImageTk.PhotoImage(image=Image.fromarray(img))
+
+        self.capturing = False
+        self.TakePict_button.place_forget()
+        self.retake_button.place(x=150, y=650)
+
+    def stop_show_frame(self):
+        self.running_capture_photo_frame = False
+        self.canvas.place_forget()
+
+    def resume_show_frame(self):
+        self.running_capture_photo_frame = True
+        self.show_frame(self.canvas)
+        self.canvas.place(x=115, y=640)
+
+    def retake(self):
+        self.captured_image = None
+        self.resume_show_frame()
+        if self.retake_button:
+            self.retake_button.place_forget()
+        self.TakePict_button.place(x=150, y=640)

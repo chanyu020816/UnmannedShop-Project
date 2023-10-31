@@ -24,6 +24,7 @@ import ObjectDetectionPage
 cap = cv2.VideoCapture(0)
 # load face images encode file
 file = open("./EncodeFile.p", "rb")
+global encodeListKnow, IDs
 encodeListwithIDs = pickle.load(file)
 encodeListKnow, IDs = encodeListwithIDs
 file.close()
@@ -137,19 +138,7 @@ class LoginPage(tk.Frame):
             activebackground="#FF3A3A", activeforeground="white", fg="white", highlightthickness=0, borderwidth=0,
             highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=250, height=40)
         resetFD_button.place(x=235, y=600)
-        # start the video capture
-        #test_button = Button(self, text="Reset", command=self.stop_show_frame,
-        #    padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"),
-        #    activebackground="#FF3A3A", activeforeground="white", fg="white", highlightthickness=0, borderwidth=0,
-        #    highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=250, height=40)
-        #test_button.place(x=235, y=50)
 
-        #test2_button = Button(self, text="Reset", command=self.resume_show_frame,
-        #     padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"),
-        #     activebackground="#FF3A3A", activeforeground="white", fg="white", highlightthickness=0,
-        #     borderwidth=0,
-        #     highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=250, height=40)
-        #test2_button.place(x=505, y=50)
         self.show_frame(self.canvas)
 
     def submit(self, username, password):
@@ -264,6 +253,7 @@ class LoginPage(tk.Frame):
                         self.detecttime = 0
                         matchIndex = argmin(faceDis)
                         image_name = IDs[matchIndex].split("!@#$%")[0]
+
                         self.nofaceLabel.place_forget()
                         self.UnDetectedLabel.place_forget()
                         if self.unknownLabel:
@@ -356,3 +346,10 @@ class LoginPage(tk.Frame):
         self.running_show_frame = True
         self.show_frame(self.canvas)
         self.canvas.place(x=180, y=220)
+
+    def reloadModel(self):
+        file = open("./EncodeFile.p", "rb")
+        encodeListwithIDs = pickle.load(file)
+        global encodeListKnow, IDs
+        encodeListKnow, IDs = encodeListwithIDs
+        file.close()
