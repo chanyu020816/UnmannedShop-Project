@@ -7,3 +7,8 @@
 /GUI/App/constant.py
 Compile
 *.p
+*.yaml
+*.pt
+events*
+*.cache
+results.csv
