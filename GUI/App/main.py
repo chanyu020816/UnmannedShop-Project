@@ -45,6 +45,7 @@ class MainView(tk.Tk):
         self.pages["ObjectDetectionPage"].grid(row=0, column=0, sticky="nsew")
         self.pages["LoginPage"].grid_forget()
         self.pages["CreateAccountPage"].grid_forget()
+        self.pages["FinishPurchasePage"].grid_forget()
         self.pages["DonePurchasePage"].grid_forget()
         self.pages["LoginPage"].stop_show_frame()
         #self.pages["ObjectDetectionPage"].resume_show_frame()
@@ -71,6 +72,7 @@ class MainView(tk.Tk):
         self.pages["FinishPurchasePage"].grid_forget()
         self.pages["ObjectDetectionPage"].stop_show_frame()
         self.pages["CreateAccountPage"].stop_show_frame()
+        self.pages["CreateAccountPage"].resetEntry()
         self.pages["LoginPage"].resume_show_frame()
         #self.after(3000, self.pages["LoginPage"].resume_show_frame())
 
