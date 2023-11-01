@@ -19,9 +19,10 @@ import datetime
 from AddFaceEncode import EncodeImages
 import cv2
 import cvzone
+from os import listdir
 cap = cv2.VideoCapture(0)
-import random
 from face_recognition import face_locations
+
 class CreateAccountPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg="#040405")
@@ -40,6 +41,7 @@ class CreateAccountPage(tk.Frame):
         self.bg_panel.image = photo
         self.bg_panel.pack(fill='both', expand='yes')
 
+        # Set up some parameters
         self.email_check_error = None
         self.username_check_error = None
         self.password_check_error = None
@@ -63,9 +65,9 @@ class CreateAccountPage(tk.Frame):
         style.configure("TCombobox", fieldbackground="#F89B9B", foreground="#000000",
             selectforeground="#000000", selectbackground="#F89B9B", padx=30, padding = "#000000")
 
-        CaptureFace_Title = tk.Label(self, text="Facial Photograph (for Face Recog)", font=("Canva Sans", 25, "bold"),
+        CaptureFace_Title = tk.Label(self, text="Facial  Photograph (for Face Recog)", font=("Canva Sans", 25, "bold"),
                                       bg="#FFF3F3", fg="#4f4e4d")
-        CaptureFace_Title.place(x=150, y=100)
+        CaptureFace_Title.place(x=150, y=120)
         self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth=0, border=0, relief="solid", width=350,
                                 highlightthickness=0)
         # self.canvas.place(x=50, y=150)
@@ -149,7 +151,7 @@ class CreateAccountPage(tk.Frame):
         self.birthdate_entry.place(x=780, y=580, width=550, height=30)
 
 
-        BacktoLogin_button = Button(self, text="Back to Login", command=self.controller.show_object_detection_page, padx=10,
+        BacktoLogin_button = Button(self, text="Back to Login", command=self.controller.show_login_page, padx=10,
             pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"), activebackground="#FF3A3A",
             activeforeground = "#FF3A3A", fg="white", highlightthickness=0, borderwidth=0, highlightcolor="#FFF3F3",
             highlightbackground="#FFF3F3", width = 250)
@@ -163,6 +165,7 @@ class CreateAccountPage(tk.Frame):
         signup_button.place(x=1080, y=680)
         
     def signup(self, email, username, password, password_check, sex, birthdate):
+        # Get the user inputs
         email_input = email.get()
         username_input = username.get()
         password_input = password.get()
@@ -171,11 +174,12 @@ class CreateAccountPage(tk.Frame):
         birthdate_input = birthdate.get()
         today = datetime.datetime.now().date().strftime("%Y-%m-%d")
 
+        # Connect to BigQuery DataBase
         credentials = service_account.Credentials.from_service_account_file('./unmannedshop-3444ca55864c.json')
         project_id = PROJECT_ID
         client = bigquery.Client(credentials=credentials, project=project_id)
 
-        ### if email already exists ###
+        ### If email already exists ###
         email_check_query = f""" \
         SELECT COUNT(*) as count \
         FROM unmannedshop.TestUserInfoFull \
@@ -186,6 +190,7 @@ class CreateAccountPage(tk.Frame):
         email_check_row = next(email_check_result)
         email_check_count = email_check_row['count']
         if email_check_count > 0:
+            # If the email is already exists
             if self.email_check_error:
                 self.email_check_error.place_forget()
             self.email_check_error = tk.Label(self, text="Email already exists. Try again.", bg="#FFF3F3",
@@ -196,7 +201,7 @@ class CreateAccountPage(tk.Frame):
             if self.email_check_error:
                 self.email_check_error.place_forget()
 
-        ### if username already exists ###
+        ### If username already exists ###
         username_check_query = f""" \
         SELECT COUNT(*) as count \
         FROM unmannedshop.TestUserInfoFull \
@@ -207,8 +212,14 @@ class CreateAccountPage(tk.Frame):
         username_check_row = next(username_check_result)
         username_check_count = username_check_row['count']
         if username_check_count > 0:
+            # Check if the username is already exists
             if self.username_check_error:
                 self.username_check_error.place_forget()
+            if self.birthdate_check_error:
+                self.birthdate_check_error.place_forget()
+            if self.password_check_error:
+                self.password_check_error.place_forget()
+
             self.username_check_error = tk.Label(self, text="Username already exists. Try again.", bg="#FFF3F3",
                                                  fg="red", font=("Open Sans", 18))
             self.username_check_error.place(x=1030, y=295)
@@ -218,21 +229,38 @@ class CreateAccountPage(tk.Frame):
                 self.username_check_error.place_forget()
 
         if password_input != password_check_input:
+            # Check user's password input and check_password is the same
+            if self.username_check_error:
+                self.username_check_error.place_forget()
+            if self.birthdate_check_error:
+                self.birthdate_check_error.place_forget()
             if self.password_check_error:
                 self.password_check_error.place_forget()
+
             self.password_check_error = tk.Label(self, text="Those passwords didn’t match. Try again.", bg="#FFF3F3",
                 fg="red", font = ("Open Sans", 18))
             self.password_check_error.place(x=990, y=455)
         elif self.is_valid_bigquery_date(birthdate_input):
+            # Check user birthdate input is valid
+            if self.username_check_error:
+                self.username_check_error.place_forget()
             if self.birthdate_check_error:
                 self.birthdate_check_error.place_forget()
+            if self.password_check_error:
+                self.password_check_error.place_forget()
             self.birthdate_check_error = tk.Label(self, text="Enter correct Birthdate format", bg="#FFF3F3",
                 fg="red", font = ("Open Sans", 18))
             self.birthdate_check_error.place(x=780, y=610)
         else:
+            # Remove all error notification
+            if self.birthdate_check_error:
+                self.birthdate_check_error.place_forget()
+            if self.username_check_error:
+                self.username_check_error.place_forget()
+            if self.email_check_error:
+                self.email_check_error.place_forget()
             if self.password_check_error:
                 self.password_check_error.place_forget()
-
 
             # SQL query to find the maximum user ID
             max_user_id = 0
@@ -244,6 +272,7 @@ class CreateAccountPage(tk.Frame):
             max_results = max_query_job.result()
             for row in max_results:
                 max_user_id = row.max_user_id
+            # Let the new user id be max user id + 1
             new_user_id = max_user_id + 1
 
             # SQL query to create new user
@@ -253,20 +282,25 @@ class CreateAccountPage(tk.Frame):
             '{password_input}' AS password, '{sex_input}' AS Sex, DATE('{birthdate_input}') AS BirthDate, \
             DATE('{today}') AS registration_date; \
             """
-
             create_new_query_job = client.query(create_new_query)
 
+            # Reset all entries
             self.email_entry.delete(0, 'end')
             self.username_entry.delete(0, 'end')
             self.password_entry.delete(0, 'end')
             self.password_check_entry.delete(0, 'end')
             self.sex_combobox.set('')
             self.birthdate_entry.delete(0, 'end')
-            EncodeImages(username_input)
+
+            # If the user took the face picture, encode the image into face recognition model
+            if len(listdir("./new_faces_images")) != 0:
+                EncodeImages(username_input)
+            # Return to login page
             self.after(5000, self.controller.AfterSignUpAccount_show_login_page())
 
 
     def is_valid_bigquery_date(self, input_date):
+        # Check whether the user birthdate input is valid
         try:
             datetime.datetime.strptime(input_date, '%Y-%m-%d')
             return False
@@ -278,19 +312,31 @@ class CreateAccountPage(tk.Frame):
         if not self.running_capture_photo_frame:
             return
 
-        self.image_id = 0  # inform function to assign new value to global variable instead of local variable
+        self.image_id = 0
 
         if self.captured_image is None:
-            # get frame
+
             ret, frame = cap.read()
             # Set the desired capture width and height
             video_width = 480
-            video_height = 480
+            video_height = 440
+
+            # Get the dimensions of the captured frame
+            height, width, channels = frame.shape
+            if width >= 1200 and height >= 880:
+                # Get the center of origin image
+                x1 = (width - 1200) // 2
+                x2 = x1 + 1200
+                y1 = (height - 880) // 2
+                y2 = y1 + 880
+                cropped_frame = frame[y1:y2, x1:x2]
+            else:
+                cropped_frame = frame
 
             if ret:
 
                 # cv2 uses `BGR` but `GUI` needs `RGB
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
                 flipped_frame = cv2.flip(frame, 1)
                 # convert to PIL image
                 img = Image.fromarray(flipped_frame)
@@ -324,6 +370,7 @@ class CreateAccountPage(tk.Frame):
                 self.after(20, self.show_frame, canvas)
 
     def capture(self):
+        # capture image
         self.capturing = True
 
         # Capture a frame
@@ -333,24 +380,29 @@ class CreateAccountPage(tk.Frame):
             # Convert the captured frame to a PhotoImage
             img = cv2.cvtColor(flipped_frame, cv2.COLOR_BGR2RGB)
 
+            # Save the image to new_faces_images
             cv2.imwrite(f"./new_faces_images/new.jpg", flipped_frame)
-
+            # Display the image taken
             self.captured_image = ImageTk.PhotoImage(image=Image.fromarray(img))
 
         self.capturing = False
         self.TakePict_button.place_forget()
-        self.retake_button.place(x=150, y=650)
+        # Replace TakePict Button with Retake Button
+        self.retake_button.place(x=150, y=640)
 
     def stop_show_frame(self):
+        # Stop Camera
         self.running_capture_photo_frame = False
         self.canvas.place_forget()
 
     def resume_show_frame(self):
+        # Resume Camera
         self.running_capture_photo_frame = True
         self.show_frame(self.canvas)
-        self.canvas.place(x=115, y=640)
+        self.canvas.place(x=115, y=170)
 
     def retake(self):
+        # Retake image
         self.captured_image = None
         self.resume_show_frame()
         if self.retake_button:
