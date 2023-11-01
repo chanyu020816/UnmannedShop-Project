@@ -41,4 +41,3 @@ def EncodeImages(username):
     file = open("./EncodeFile.p", "wb")
     pickle.dump(encodeListKnowWithIds, file)
     file.close()
-

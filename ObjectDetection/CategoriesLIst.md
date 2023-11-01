@@ -16,8 +16,5 @@
 
 RedBulls - Sugar Free X
 PureTea-Lemon Tea X
-Tree Top - Sparking Apple 
-Pork Flavor Noodles
-
-
+Tree Top - Sparking Apple
 21Plus-White Gourd & Lemon Cold Drink

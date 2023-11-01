@@ -21,7 +21,7 @@ if __name__ == "__main__":
     for path in os.listdir(folderpath):
         imgList.append(cv2.imread(os.path.join(folderpath, path)))
         imgID.append(os.path.splitext(path)[0])
-        print(imgID, "Complete")
+    print(imgID, "Complete")
 
     encodeListKnown = findEncoding(imgList)
     encodeListKnowWithIds = [encodeListKnown, imgID]
