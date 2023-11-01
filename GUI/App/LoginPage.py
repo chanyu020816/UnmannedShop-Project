@@ -251,6 +251,7 @@ class LoginPage(tk.Frame):
                     img = img.resize((video_width, video_height), Image.ANTIALIAS)
                     if any(matches):
                         self.detecttime = 0
+
                         matchIndex = argmin(faceDis)
                         image_name = IDs[matchIndex].split("!@#$%")[0]
 
@@ -295,7 +296,9 @@ class LoginPage(tk.Frame):
                         self.detecttime += 1
                         self.nofaceLabel.place_forget()
                         self.UnDetectedLabel.place(x=185, y=550)
-                        if self.detecttime >= 30:
+
+                        # If it still not detect any user after 40 times. Place UnknownUser Label
+                        if self.detecttime >= 40:
                             self.unknownLabel.place(x=185, y=550)
                             if self.UnDetectedLabel:
                                 self.UnDetectedLabel.place_forget()
@@ -315,6 +318,9 @@ class LoginPage(tk.Frame):
             self.after(20, self.show_frame, canvas)
 
     def resetFD(self):
+        # Reset all user input & face recog status
+
+        # if it already detected user's face, restart detect status
         if self.detect_status == 1:
             # if self.FaceDetectUserID:
             self.FaceDetectUserID.place_forget()
@@ -322,10 +328,13 @@ class LoginPage(tk.Frame):
             self.detect_status = 0
             self.username_status = 0
             self.password_status = 0
-            self.detecttime = 0
             self.UnDetectedLabel.place_forget()
+        # Remove all user entries
         self.username_entry.delete(0, 'end')
         self.password_entry.delete(0, 'end')
+        # Reset detecttime
+        self.detecttime = 0
+        # Remove all error notifications
         if self.user_not_found_label:
             self.user_not_found_label.place_forget()
         if self.password_error:
@@ -334,22 +343,29 @@ class LoginPage(tk.Frame):
             self.unknowLabel.place_forget()
 
     def toCreateAccountPage(self):
+        # Go to Create Account Page
+        # Reset all inputs
         self.resetFD()
         self.stop_show_frame()
         self.controller.show_create_account_page()
 
     def stop_show_frame(self):
+        # Stop Camera
         self.running_show_frame = False
         self.canvas.place_forget()
 
     def resume_show_frame(self):
+        # Resume Camera
         self.running_show_frame = True
         self.show_frame(self.canvas)
         self.canvas.place(x=180, y=220)
 
     def reloadModel(self):
+        # If the user upload their face images when creating account.
+        # Reload the latest face recognition model.
         file = open("./EncodeFile.p", "rb")
         encodeListwithIDs = pickle.load(file)
         global encodeListKnow, IDs
         encodeListKnow, IDs = encodeListwithIDs
         file.close()
+
