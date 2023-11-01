@@ -163,7 +163,7 @@ class CreateAccountPage(tk.Frame):
             activeforeground = "#FF3A3A", fg="white", highlightthickness=0, borderwidth=0, highlightcolor="#FFF3F3",
             highlightbackground="#FFF3F3", width = 250)
         signup_button.place(x=1080, y=680)
-        
+
     def signup(self, email, username, password, password_check, sex, birthdate):
         # Get the user inputs
         email_input = email.get()
@@ -238,7 +238,7 @@ class CreateAccountPage(tk.Frame):
                 self.password_check_error.place_forget()
 
             self.password_check_error = tk.Label(self, text="Those passwords didn’t match. Try again.", bg="#FFF3F3",
-                fg="red", font = ("Open Sans", 18))
+                fg="red", font=("Open Sans", 18))
             self.password_check_error.place(x=990, y=455)
         elif self.is_valid_bigquery_date(birthdate_input):
             # Check user birthdate input is valid
@@ -408,3 +408,12 @@ class CreateAccountPage(tk.Frame):
         if self.retake_button:
             self.retake_button.place_forget()
         self.TakePict_button.place(x=150, y=640)
+
+    def resetEntry(self):
+        # Reset all entries
+        self.email_entry.delete(0, 'end')
+        self.username_entry.delete(0, 'end')
+        self.password_entry.delete(0, 'end')
+        self.password_check_entry.delete(0, 'end')
+        self.sex_combobox.set('')
+        self.birthdate_entry.delete(0, 'end')
