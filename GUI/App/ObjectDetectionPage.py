@@ -15,12 +15,14 @@ import cv2
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
 cap = cv2.VideoCapture(0)
-
+from google.cloud import bigquery
+from google.oauth2 import service_account
+from constant import *
 from numpy import array
 from ultralytics import YOLO
+import datetime
+from uuid import uuid1
 model = YOLO("./best.pt")
-class_list = ['Bak Kut Teh Flavor Noodles', 'Doritos', 'I MEI-Milk Puff', 'M-M-Crisp', 'M-M-Peanut', 'Oreo', 'Popconcern-Sweet-Salty', 'Pringles-Origin', 'PureTea-Black Tea', 'PureTea-LemonGreen Tea', 'Skittles', 'White Chocolate Ice Cream']
-color_list = ["#FF5733", "#42A5F5", "#7B8D8C", "#E57373", "#FFD700", "#4CAF50", "#9C27B0", "#FF5722", "#607D8B", "#FFD600", "#795548", "#E91E63"]
 
 class ObjectDetectionPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -46,6 +48,13 @@ class ObjectDetectionPage(tk.Frame):
         self.capture_result = None
         self.nothing_found = None
         self.retake_button = None
+        self.TotalPrice = None
+        self.purchase_button = None
+        self.upload_count = 0
+
+        credentials = service_account.Credentials.from_service_account_file('./unmannedshop-3444ca55864c.json')
+        project_id = PROJECT_ID
+        self.client = bigquery.Client(credentials=credentials, project=project_id)
 
         # Set up the frame's dimensions
         self.configure(width=1400, height=800)
@@ -66,16 +75,18 @@ class ObjectDetectionPage(tk.Frame):
         self.table = ttk.Treeview(self, columns=('item_id', 'item_name', 'item_num', 'total_price'), show='headings',
             style="Treeview")
         self.table.heading("#0", text="qwer")
-        self.table.column("#0", width=100)
+        self.table.column("#0", width=100, anchor="c")
         self.table.heading('item_id', text='Item ID')
-        self.table.column("item_id", width=100)
+        self.table.column("item_id", width=100, anchor="c")
         self.table.heading('item_name', text='Item Name')
         self.table.column("item_name", width=250)
         self.table.heading('item_num', text='Number')
-        self.table.column("item_num", width=100)
+        self.table.column("item_num", width=100, anchor="c")
         self.table.heading('total_price', text='Total Price')
-        self.table.column("total_price", width=150)
-        self.table.place(x=730, y=300)
+        self.table.column("total_price", width=150, anchor="c")
+        self.table.place(x=730, y=270)
+        self.table.tag_configure("myfont", font=("Helvetica", 18, 'bold'))
+        self.table.tag_configure("centered", anchor="center")
 
         ## FaceRecog TITLE ##
         ObjectDetect_Title = tk.Label(self, text="Object   Detection", font=("Canva Sans", 35, "bold"),
@@ -97,7 +108,7 @@ class ObjectDetectionPage(tk.Frame):
             highlightbackground="#FFF3F3", width=250)
         self.showInfo_button.place(x=900, y=80)
 
-        logout_button = Button(self, text="Logout", command=self.controller.show_login_page, padx=10, pady=8,
+        logout_button = Button(self, text="Logout", command=self.logout, padx=10, pady=8,
             bg="#DF3F3F", bd=0, font=("Open Sans", 15, "bold"), activebackground="#FF3A3A",
             activeforeground="#FF3A3A", fg="white", highlightthickness=0, borderwidth=0, highlightcolor="#FFF3F3",
             highlightbackground="#FFF3F3", width=100, height=30)
@@ -116,7 +127,7 @@ class ObjectDetectionPage(tk.Frame):
              highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=280, height=40)
         upload_button.place(x=80, y=680)
 
-        self.purchase_button = Button(self, text="Confirm   Purchase", command=self.controller.show_finish_purchase_page,
+        self.purchase_button = Button(self, text="Confirm   Purchase", command=self.ConfirmPurchase,
             padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 25, "bold"),
             activebackground="#FF3A3A", activeforeground="white", fg="white", highlightthickness=0, borderwidth=0,
             highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=280, height=50)
@@ -129,7 +140,7 @@ class ObjectDetectionPage(tk.Frame):
         from LoginPage import login_user_name, login_user_ID
         if self.showInfo_button:
             self.showInfo_button.place_forget()
-        self.ShowUserInfoLabel = tk.Label(self, text=f"User Information",
+        self.ShowUserInfoLabel = tk.Label(self, text=f"User   Information",
                                          font=("yu gothic ui", 25, "bold"),
                                          bg="#FFF3F3", fg="#4f4e4d")
         self.ShowUserInfoLabel.place(x=930, y=80)
@@ -145,24 +156,21 @@ class ObjectDetectionPage(tk.Frame):
         self.FaceDetectUserName.place(x=800, y=150)
 
     def show_frame(self, canvas):
+
         if not self.running_object_detect_frame:
             return
         self.image_id = 0  # inform function to assign new value to global variable instead of local variable
         if self.captured_image is not None:
-
             if len(self.model_result) == 0:
                 self.nothing_found = tk.Label(self, text="No Item Detected", font=("Canva Sans", 35, "bold"),
                     bg="#FFF3F3", fg="#DF3F3F")
-                self.nothing_found.place(x=880, y=250)
+                self.nothing_found.place(x=880, y=220)
             else:
-
+                self.upload_count += 1
                 if self.nothing_found is not None:
                     self.nothing_found.place_forget()
+                self.DisplayItems()
 
-                for item in self.model_result:
-                    data = (1, item, 2, 20)
-                    self.table.insert(parent='', index=0, values=data)
-                self.purchase_button.place(x=880, y=650)
 
         else:
             if self.capture_result:
@@ -270,6 +278,8 @@ class ObjectDetectionPage(tk.Frame):
     def retake(self):
         for item in self.table.get_children():
             self.table.delete(item)
+        self.TotalPrice.place_forget()
+        self.upload_count = 0
         self.captured_image = None
         if self.nothing_found is not None:
             self.nothing_found.place_forget()
@@ -282,8 +292,19 @@ class ObjectDetectionPage(tk.Frame):
     def upload_image(self):
         if self.nothing_found is not None:
             self.nothing_found.place_forget()
-        self.retake()
-        self.after(500)
+        if self.upload_count != 0:
+            self.retake()
+            if self.purchase_button is not None:
+                self.purchase_button.place_forget()
+        else:
+
+            for item in self.table.get_children():
+                self.table.delete(item)
+            if self.TotalPrice is not None:
+                self.TotalPrice.place_forget()
+            self.upload_count += 1
+
+        self.after(300)
         file_path = askopenfilename(filetypes=[('Jpg Files', '*.jpg'), ('PNG Files','*.png')])
         if file_path:
             #
@@ -334,7 +355,72 @@ class ObjectDetectionPage(tk.Frame):
             photo = ImageTk.PhotoImage(image=image)
             self.canvas.create_image(0, 0, anchor="nw", image=photo)
             self.canvas.image = photo
-            self.canvas.place(x=80, y=110)
+            self.canvas.place(x=80, y=130)
 
     def DisplayItems(self):
-        ...
+        item_counts = {}
+        for item in self.model_result:
+            if item in item_counts:
+                item_counts[item] += 1
+            else:
+                item_counts[item] = 1
+
+        query = """
+        SELECT item_name, item_id, item_price
+        FROM unmannedshop.TestItemPrice
+        WHERE item_name IN ({})
+        """.format(", ".join(["'{}'".format(item) for item in item_counts]))
+
+        query_job = self.client.query(query)
+        results = query_job.result()
+        self.total_price = 0
+        self.full_result = []
+        for row in results:
+            item_name = row.item_name
+            item_id = row.item_id
+            item_price = row.item_price
+            count = item_counts[item_name]
+            data = (item_id, item_name, count, item_price)
+            self.full_result.append(data)
+            self.total_price += count * item_price
+            self.table.insert(parent='', index='end', values=data, tags=("centered", "myfont"))
+
+        self.TotalPrice = tk.Label(self, text=f"Total: $ {self.total_price}", font=("Canva Sans", 28, "bold"),
+            bg="#FFF3F3", fg="#4f4e4d")
+        self.TotalPrice.place(x=750, y=600)
+        self.purchase_button.place(x=880, y=670)
+
+    def ConfirmPurchase(self):
+        from LoginPage import login_user_ID
+        order_id = str(uuid1())
+        order_item_id = str(uuid1())
+        today = datetime.datetime.now().date().strftime("%Y-%m-%d")
+        add_order_query = f"""
+        INSERT INTO unmannedshop.TestOrderHistory (order_id, user_id, order_date, total_price)
+        SELECT '{order_id}' AS order_id, {login_user_ID} AS user_id, DATE('{today}') AS order_date,
+        {self.total_price} AS total_amount;
+        """
+        add_order_query_job = self.client.query(add_order_query)
+
+        add_order_item_query = "INSERT INTO unmannedshop.TestOrderItems (order_item_id, order_id, item_id, number, item_price)"
+        i = 0
+        for item in self.full_result:
+            if i != 0:
+                add_order_item_query = add_order_item_query + "UNION ALL"
+            new_query = f"""
+            SELECT '{str(uuid1())}' AS order_item_id, '{order_id}' AS order_id, {item[0]} AS item_id, 
+            {item[2]} AS number, {item[3]} AS item_price
+            """
+            i += 1
+            add_order_item_query = add_order_item_query + new_query
+        add_order_item_query = add_order_item_query + ";"
+        add_order_item_query_job = self.client.query(add_order_item_query)
+
+        self.upload_count = 0
+        self.retake()
+        self.controller.show_finish_purchase_page()
+
+    def logout(self):
+        self.upload_count = 0
+        self.retake()
+        self.controller.show_login_page()
