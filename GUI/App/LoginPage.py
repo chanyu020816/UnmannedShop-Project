@@ -133,11 +133,11 @@ class LoginPage(tk.Frame):
             highlightbackground="#FFF3F3", width=250)
         submit_button.place(x=1080, y=600)
 
-        resetFD_button = Button(self, text="Reset", command=self.resetFD,
+        self.resetFD_button = Button(self, text="Reset", command=self.resetFD,
             padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"),
             activebackground="#FF3A3A", activeforeground="white", fg="white", highlightthickness=0, borderwidth=0,
             highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=250, height=40)
-        resetFD_button.place(x=235, y=600)
+
 
         self.show_frame(self.canvas)
 
@@ -278,6 +278,7 @@ class LoginPage(tk.Frame):
                                                            bg="#FFFFFF", fg="#4f4e4d")
                             self.FaceDetectUserName.place(x=185, y=565)
                             self.detect_status = 1
+                            self.resetFD_button.place(x=235, y=600)
                         if self.username_status == 0:
                             self.username_entry.delete(0, 'end')
                             self.username_entry.insert(0, image_name)
@@ -341,6 +342,7 @@ class LoginPage(tk.Frame):
             self.password_error.place_forget()
         if self.unknowLabel:
             self.unknowLabel.place_forget()
+        self.resetFD_button.place_forget()
 
     def toCreateAccountPage(self):
         # Go to Create Account Page
