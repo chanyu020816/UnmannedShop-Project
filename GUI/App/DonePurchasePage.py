@@ -39,6 +39,6 @@ class DonePurchasePage(tk.Frame):
 
     def create_done_purchase_page(self):
 
-        UserLogin_Title = tk.Label(self, text="Return  to  Login  after  15  seconds...",
+        UserLogin_Title = tk.Label(self, text="Return  to  Login  after  5  seconds...",
             font=("Canva Sans", 30, "bold"), bg="#FFF3F3", fg="#545454")
         UserLogin_Title.place(x=450, y=210)

@@ -42,11 +42,11 @@ class FinishPurchasePage(tk.Frame):
             bg="#FFF3F3", fg="#545454")
         FinishPurchase_Title.place(x=520, y=285)
 
-        keep_purchase_button = Button(self, text="Continue   Purchasing", command=self.controller.show_object_detection_page,
+        continue_purchase_button = Button(self, text="Continue   Purchasing", command=self.controller.show_object_detection_page,
             padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"), activebackground="#FF3A3A",
             activeforeground="white", fg="white", highlightthickness=0, borderwidth=0, highlightcolor="#FFF3F3",
             highlightbackground="#FFF3F3", width=250)
-        keep_purchase_button.place(x=440, y=400)
+        continue_purchase_button.place(x=440, y=400)
 
         done_purchase_button = Button(self, text="Done   Purchasing", command=self.controller.show_done_purchase_page,
             padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"), activebackground="#FF3A3A",
