@@ -23,14 +23,11 @@ class MainView(tk.Tk):
             "DonePurchasePage": DonePurchasePage(self.container, self)
         }
 
-        self.test = 2
         self.Initial()
 
 
     def Initial(self):
         self.pages["LoginPage"].grid(row=0, column=0, sticky="nsew")
-
-        #self.pages["LoginPage"].resume_show_frame()
 
     def show_create_account_page(self):
         self.pages["CreateAccountPage"].grid(row=0, column=0, sticky="nsew")
@@ -62,7 +59,7 @@ class MainView(tk.Tk):
         self.pages["DonePurchasePage"].grid(row=0, column=0, sticky="nsew")
         self.pages["LoginPage"].grid_forget()
         self.pages["FinishPurchasePage"].grid_forget()
-        self.after(15000, self.show_login_page)
+        self.after(5000, self.show_login_page)
 
     def show_login_page(self):
         self.pages["LoginPage"].grid(row=0, column=0, sticky="nsew")
@@ -73,8 +70,8 @@ class MainView(tk.Tk):
         self.pages["ObjectDetectionPage"].stop_show_frame()
         self.pages["CreateAccountPage"].stop_show_frame()
         self.pages["CreateAccountPage"].resetEntry()
-        self.pages["LoginPage"].resume_show_frame()
-        #self.after(3000, self.pages["LoginPage"].resume_show_frame())
+        # self.pages["LoginPage"].resume_show_frame()
+        self.after(50, self.pages["LoginPage"].resume_show_frame())
 
     def AfterSignUpAccount_show_login_page(self):
         self.pages["LoginPage"].grid(row=0, column=0, sticky="nsew")
