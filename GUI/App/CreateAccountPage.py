@@ -65,7 +65,7 @@ class CreateAccountPage(tk.Frame):
         style.configure("TCombobox", fieldbackground="#F89B9B", foreground="#000000",
             selectforeground="#000000", selectbackground="#F89B9B", padx=30, padding = "#000000")
 
-        CaptureFace_Title = tk.Label(self, text="Facial  Photograph (for Face Recog)", font=("Canva Sans", 25, "bold"),
+        CaptureFace_Title = tk.Label(self, text="Facial  Photograph (for Recognition)", font=("Canva Sans", 25, "bold"),
             bg="#FFF3F3", fg="#4f4e4d")
         CaptureFace_Title.place(x=150, y=120)
         self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth=0, border=0, relief="solid", width=350,
