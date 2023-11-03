@@ -12,3 +12,6 @@ Compile
 events*
 *.cache
 results.csv
+build
+dist
+*.mov
