@@ -208,11 +208,10 @@ class LoginPage(tk.Frame):
                 self.password_error.place(x=783, y=360)
 
     def show_frame(self, canvas):
-        #if status.get() == "stop":
-        #    return
+
         if not self.running_show_frame:
             return
-        self.image_id = 0  # inform function to assign new value to global variable instead of local variable
+        self.image_id = 0
         # get frame
         ret, frame = cap.read()
         video_width = 380
@@ -240,21 +239,20 @@ class LoginPage(tk.Frame):
                         self.unknownLabel.place_forget()
             else:
                 for encodeFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
-                    matches = face_recognition.compare_faces(encodeListKnow, encodeFace, tolerance=0.35)
+                    matches = face_recognition.compare_faces(encodeListKnow, encodeFace, tolerance=0.5)
                     faceDis = face_recognition.face_distance(encodeListKnow, encodeFace)
 
                     y1, x2, y2, x1 = faceLoc
                     y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
                     bbox = x1, y1, x2 - x1, y2 - y1
                     img_t = cvzone.cornerRect(flipped_frame, bbox, rt=0)
-                    img = Image.fromarray(img_t)
-                    img = img.resize((video_width, video_height), Image.ANTIALIAS)
+
                     if any(matches):
                         self.detecttime = 0
 
                         matchIndex = argmin(faceDis)
                         image_name = IDs[matchIndex].split("!@#$%")[0]
-
+                        img_t = cv2.putText(img_t, image_name, (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
                         self.nofaceLabel.place_forget()
                         self.UnDetectedLabel.place_forget()
                         if self.unknownLabel:
@@ -265,6 +263,7 @@ class LoginPage(tk.Frame):
 
                             query_job = self.client.query(query)
                             result = query_job.result()
+                            self.FDuserid = ""
                             for row in result:
                                 self.FDuserid = row.user_id
                             self.FaceDetectUserID = tk.Label(self, text=f"User ID:  {self.FDuserid}",
@@ -303,6 +302,8 @@ class LoginPage(tk.Frame):
                             self.unknownLabel.place(x=185, y=550)
                             if self.UnDetectedLabel:
                                 self.UnDetectedLabel.place_forget()
+                img = Image.fromarray(img_t)
+                img = img.resize((video_width, video_height), Image.ANTIALIAS)
             photo = ImageTk.PhotoImage(image=img)
             canvas.photo = photo
 
@@ -319,7 +320,7 @@ class LoginPage(tk.Frame):
             self.after(20, self.show_frame, canvas)
 
     def resetFD(self):
-        # Reset all user input & face recog status
+        # Reset all user input & face recognition status
 
         # if it already detected user's face, restart detect status
         if self.detect_status == 1:
