@@ -66,7 +66,7 @@ class CreateAccountPage(tk.Frame):
             selectforeground="#000000", selectbackground="#F89B9B", padx=30, padding = "#000000")
 
         CaptureFace_Title = tk.Label(self, text="Facial  Photograph (for Face Recog)", font=("Canva Sans", 25, "bold"),
-                                      bg="#FFF3F3", fg="#4f4e4d")
+            bg="#FFF3F3", fg="#4f4e4d")
         CaptureFace_Title.place(x=150, y=120)
         self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth=0, border=0, relief="solid", width=350,
                                 highlightthickness=0)
@@ -78,7 +78,7 @@ class CreateAccountPage(tk.Frame):
             highlightthickness=0,
             borderwidth=0,
             highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=400, height=55)
-        self.TakePict_button.place(x=150, y=640)
+        self.TakePict_button.place(x=150, y=630)
 
         self.retake_button = Button(self, text="Retake   Photo", command=self.retake,
             padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 23, "bold"),
@@ -88,8 +88,8 @@ class CreateAccountPage(tk.Frame):
             highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=400, height=55)
 
         ## TITLE ##
-        UserLogin_Title = tk.Label(self, text = "Create    Account", font=("Canva Sans", 35, "bold"), bg="#FFF3F3", fg="#FF3A3A")
-        UserLogin_Title.place(x = 930, y = 80)
+        UserLogin_Title = tk.Label(self, text="Create    Account", font=("Canva Sans", 35, "bold"), bg="#FFF3F3", fg="#FF3A3A")
+        UserLogin_Title.place(x=930, y=80)
 
         ## EMAIL ##
         email_label = tk.Label(self, text="Email", bg="#FFF3F3", fg="#4f4e4d",
@@ -104,7 +104,7 @@ class CreateAccountPage(tk.Frame):
         ## USERNAME ##
         username_label = tk.Label(self, text="Username", bg="#FFF3F3", fg="#4f4e4d",
                                     font=("yu gothic ui", 20, "bold"))
-        username_label.place(x = 780, y = 220)
+        username_label.place(x=780, y=220)
         username = tk.StringVar()
         self.username_entry = tk.Entry(self, highlightthickness=0, relief='flat', bg="#F89B9B", fg="#000000",
                                     font=("yu gothic ui ", 18), insertbackground = '#6b6a69', borderwidth=7,
@@ -311,9 +311,7 @@ class CreateAccountPage(tk.Frame):
 
         if not self.running_capture_photo_frame:
             return
-
         self.image_id = 0
-
         if self.captured_image is None:
 
             ret, frame = cap.read()
@@ -388,7 +386,7 @@ class CreateAccountPage(tk.Frame):
         self.capturing = False
         self.TakePict_button.place_forget()
         # Replace TakePict Button with Retake Button
-        self.retake_button.place(x=150, y=640)
+        self.retake_button.place(x=150, y=630)
 
     def stop_show_frame(self):
         # Stop Camera
@@ -407,7 +405,7 @@ class CreateAccountPage(tk.Frame):
         self.resume_show_frame()
         if self.retake_button:
             self.retake_button.place_forget()
-        self.TakePict_button.place(x=150, y=640)
+        self.TakePict_button.place(x=150, y=630)
 
     def resetEntry(self):
         # Reset all entries

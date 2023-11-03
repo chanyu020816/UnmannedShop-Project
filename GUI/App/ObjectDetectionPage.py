@@ -256,15 +256,11 @@ class ObjectDetectionPage(tk.Frame):
             flipped_frame = cv2.flip(frame, 1)
             # Convert the captured frame to a PhotoImage
             img = cv2.cvtColor(flipped_frame, cv2.COLOR_BGR2RGB)
-
             self.captured_image = ImageTk.PhotoImage(image=Image.fromarray(img))
 
         self.capturing = False
         self.TakeImage_button.place_forget()
         self.retake_button.place(x=400, y=680)
-
-    def run(self):
-        self.window.mainloop()
 
     def stop_show_frame(self):
         self.running_object_detect_frame = False
@@ -278,7 +274,8 @@ class ObjectDetectionPage(tk.Frame):
     def retake(self):
         for item in self.table.get_children():
             self.table.delete(item)
-        self.TotalPrice.place_forget()
+        if self.TotalPrice is not None:
+            self.TotalPrice.place_forget()
         self.upload_count = 0
         self.captured_image = None
         if self.nothing_found is not None:
@@ -287,7 +284,8 @@ class ObjectDetectionPage(tk.Frame):
             self.retake_button.place_forget()
         self.TakeImage_button.place(x=400, y=680)
         self.resume_show_frame()
-        self.purchase_button.place_forget()
+        if self.purchase_button is not None:
+            self.purchase_button.place_forget()
 
     def upload_image(self):
         if self.nothing_found is not None:
@@ -297,7 +295,6 @@ class ObjectDetectionPage(tk.Frame):
             if self.purchase_button is not None:
                 self.purchase_button.place_forget()
         else:
-
             for item in self.table.get_children():
                 self.table.delete(item)
             if self.TotalPrice is not None:
@@ -307,7 +304,7 @@ class ObjectDetectionPage(tk.Frame):
         self.after(300)
         file_path = askopenfilename(filetypes=[('Jpg Files', '*.jpg'), ('PNG Files','*.png')])
         if file_path:
-            #
+
             # Open and display the selected image
             image = Image.open(file_path)
             image = image.resize((600, 540))
@@ -316,22 +313,22 @@ class ObjectDetectionPage(tk.Frame):
             self.captured_image = ""
             self.TakeImage_button.place_forget()
             self.retake_button.place(x=400, y=680)
+
             ## Model Predict ##
             results = model(image, verbose=False, stream=True)
-            video_width = 600  # Change this to your preferred width
+            video_width = 600
             video_height = 540
-            # coordinates
+            # Items' coordinates
             for r in results:
-                # print(random.randint(1, 1))
                 boxes = r.boxes
                 self.model_result = []
                 for box in boxes:
                     # bounding box
                     x1, y1, x2, y2 = box.xyxy[0]
+                    # Convert to int value
+                    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
-                    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)  # convert to int values
-
-                    # class name
+                    # Get class name
                     cls = int(box.cls[0])
                     self.model_result.append(class_list[cls])
 
@@ -343,15 +340,11 @@ class ObjectDetectionPage(tk.Frame):
 
                     # print("Class name ", class_list[cls])
                     org = [x1, y1]
-                    font = cv2.FONT_HERSHEY_SIMPLEX
-                    fontScale = 1
-                    thickness = 2
-                    # self.captured_image = ""
-                    img_t = cv2.putText(img_t, class_list[cls], org, font, fontScale, bgr_color, thickness)
+
+                    img_t = cv2.putText(img_t, class_list[cls], org, cv2.FONT_HERSHEY_SIMPLEX, 1, bgr_color, 2)
                     img = Image.fromarray(img_t)
                     image = img.resize((video_width, video_height), Image.ANTIALIAS)
-            #if self.nothing_found is not None:
-            #    self.nothing_found.place_forget()
+
             photo = ImageTk.PhotoImage(image=image)
             self.canvas.create_image(0, 0, anchor="nw", image=photo)
             self.canvas.image = photo
@@ -415,7 +408,7 @@ class ObjectDetectionPage(tk.Frame):
             add_order_item_query = add_order_item_query + new_query
         add_order_item_query = add_order_item_query + ";"
         add_order_item_query_job = self.client.query(add_order_item_query)
-
+        print(f"Order ID: {order_id} Complete")
         self.upload_count = 0
         self.retake()
         self.controller.show_finish_purchase_page()
