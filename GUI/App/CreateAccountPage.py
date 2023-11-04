@@ -78,7 +78,7 @@ class CreateAccountPage(tk.Frame):
             highlightthickness=0,
             borderwidth=0,
             highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=400, height=55)
-        self.TakePict_button.place(x=150, y=630)
+        self.TakePict_button.place(x=160, y=630)
 
         self.retake_button = Button(self, text="Retake   Photo", command=self.retake,
             padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 23, "bold"),
@@ -386,7 +386,7 @@ class CreateAccountPage(tk.Frame):
         self.capturing = False
         self.TakePict_button.place_forget()
         # Replace TakePict Button with Retake Button
-        self.retake_button.place(x=150, y=630)
+        self.retake_button.place(x=160, y=630)
 
     def stop_show_frame(self):
         # Stop Camera
@@ -405,7 +405,7 @@ class CreateAccountPage(tk.Frame):
         self.resume_show_frame()
         if self.retake_button:
             self.retake_button.place_forget()
-        self.TakePict_button.place(x=150, y=630)
+        self.TakePict_button.place(x=160, y=630)
 
     def resetEntry(self):
         # Reset all entries
