@@ -3,4 +3,4 @@ inp_lab_pth : Input/labels
 out_img_pth : AugData/images
 out_lab_pth : AugData/labels
 transformed_file_name : aug
-CLASSES : ['Bak Kut Teh Flavor Noodles', 'Doritos', 'I MEI-Milk Puff', 'M-M-Crisp', 'M-M-Peanut', 'Oreo', 'Popconcern-Sweet-Salty', 'Pringles-Origin', 'PureTea-Black Tea', 'PureTea-LemonGreen Tea', 'Skittles', 'White Chocolate Ice Cream']
+CLASSES : ['Bak Kut Teh Flavor Noodles', 'Doritos', 'I MEI-Milk Puff', 'Kitkat', 'M-M-Crisp', 'M-M-Peanut', 'Mango Ice Cream', 'Meiji-Chocolate', 'Mint Chocolate', 'Oreo', 'Popconcern-Sweet-Salty', 'Pringles-Origin', 'PureTea-Black Tea', 'PureTea-LemonGreen Tea', 'Skittles', 'White Chocolate Ice Cream']

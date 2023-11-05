@@ -224,7 +224,7 @@ class ObjectDetectionPage(tk.Frame):
                         # print("Class name ", class_list[cls])
                         org = [x1, y1]
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        fontScale = 1
+                        fontScale = 0.75
                         thickness = 2
 
                         img_t = cv2.putText(img_t, class_list[cls], org, font, fontScale, bgr_color, thickness)
@@ -341,7 +341,7 @@ class ObjectDetectionPage(tk.Frame):
                     # print("Class name ", class_list[cls])
                     org = [x1, y1]
 
-                    img_t = cv2.putText(img_t, class_list[cls], org, cv2.FONT_HERSHEY_SIMPLEX, 1, bgr_color, 2)
+                    img_t = cv2.putText(img_t, class_list[cls], org, cv2.FONT_HERSHEY_SIMPLEX, 0.75, bgr_color, 2)
                     img = Image.fromarray(img_t)
                     image = img.resize((video_width, video_height), Image.ANTIALIAS)
 
@@ -373,9 +373,10 @@ class ObjectDetectionPage(tk.Frame):
             item_id = row.item_id
             item_price = row.item_price
             count = item_counts[item_name]
+            item_price *= count
             data = (item_id, item_name, count, item_price)
             self.full_result.append(data)
-            self.total_price += count * item_price
+            self.total_price += item_price
             self.table.insert(parent='', index='end', values=data, tags=("centered", "myfont"))
 
         self.TotalPrice = tk.Label(self, text=f"Total: $ {self.total_price}", font=("Canva Sans", 28, "bold"),
@@ -411,6 +412,7 @@ class ObjectDetectionPage(tk.Frame):
         print(f"Order ID: {order_id} Complete")
         self.upload_count = 0
         self.retake()
+        self.TotalPrice.place_forget()
         self.controller.show_finish_purchase_page()
 
     def logout(self):
