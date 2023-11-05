@@ -22,7 +22,7 @@ from numpy import array
 from ultralytics import YOLO
 import datetime
 from uuid import uuid1
-model = YOLO("./best.pt")
+model = YOLO("./weights/best.pt")
 
 class ObjectDetectionPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -209,8 +209,7 @@ class ObjectDetectionPage(tk.Frame):
                         # bounding box
                         x1, y1, x2, y2 = box.xyxy[0]
 
-                        x1, y1, x2, y2 = (int(round(int(x1) * 1.1)), int(round(int(y1) * 1.1)),
-                            int(round(int(x2) * 0.9)), int(round(int(y2) * 0.9))) # convert to int values
+                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
                         # class name
                         cls = int(box.cls[0])
