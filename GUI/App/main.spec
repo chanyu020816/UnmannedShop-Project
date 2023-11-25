@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['main.py'],
-    pathex=[],
+    ['main.py', 'constant.py', 'ImageConvertResult.py', 'LoginPage.py', 'CreateAccountPage.py', 'AddFaceEncode.py', 'ObjectDetectionPage.py', 'FinishPurchasePage.py', 'DonePurchasePage.py'],
+    pathex=['/Users/chenyuliu/Desktop/Unmanned Shop/GUI/App'],
     binaries=[],
-    datas=[],
+    datas=[('EncodeFile.p', './'), ('best.pt', './')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
