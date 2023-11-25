@@ -15,13 +15,13 @@ import uuid
 from constant import *
 import constant
 import cv2
+from camera import cap
 import cvzone
 import face_recognition
 import pickle
 from numpy import argmin
 import ObjectDetectionPage
 # set up webcam
-cap = cv2.VideoCapture(0)
 # load face images encode file
 file = open("./EncodeFile.p", "rb")
 global encodeListKnow, IDs

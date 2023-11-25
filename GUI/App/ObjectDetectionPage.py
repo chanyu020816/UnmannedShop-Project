@@ -14,7 +14,7 @@ else:
 import cv2
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
-cap = cv2.VideoCapture(0)
+from camera import cap
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from constant import *

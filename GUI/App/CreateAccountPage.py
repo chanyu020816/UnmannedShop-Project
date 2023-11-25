@@ -20,7 +20,7 @@ from AddFaceEncode import EncodeImages
 import cv2
 import cvzone
 from os import listdir
-cap = cv2.VideoCapture(0)
+from camera import cap
 from face_recognition import face_locations
 
 class CreateAccountPage(tk.Frame):
