@@ -4,13 +4,6 @@ import tkinter.messagebox
 from ImageConvertResult import DonePurchasePageBg
 import base64
 from io import BytesIO
-from sys import platform
-
-if platform == "darwin":
-    from tkmacosx import Button
-else:
-    from tkinter import Button
-import time
 
 class DonePurchasePage(tk.Frame):
     def __init__(self, parent, controller):

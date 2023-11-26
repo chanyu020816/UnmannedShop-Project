@@ -4,12 +4,7 @@ import tkinter.messagebox
 from ImageConvertResult import FinishPurchasePageBg
 import base64
 from io import BytesIO
-from sys import platform
-
-if platform == "darwin":
-    from tkmacosx import Button
-else:
-    from tkinter import Button
+from tkmacosx import Button
 import time
 
 class FinishPurchasePage(tk.Frame):

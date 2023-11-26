@@ -3,12 +3,8 @@ from PIL import ImageTk, Image
 from ImageConvertResult import LoginFaceDetectPageBg
 import base64
 from io import BytesIO
-from sys import platform
-# if the operate system is macos, Button should be imported from tkmascos
-if platform == "darwin":
-    from tkmacosx import Button
-else:
-    from tkinter import Button
+from tkmacosx import Button
+
 from google.cloud import bigquery
 from google.oauth2 import service_account
 import uuid
@@ -229,7 +225,7 @@ class LoginPage(tk.Frame):
             imgS = cv2.resize(flipped_frame, (0, 0), None, 0.25, 0.25)
             imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
             faceCurFrame = face_recognition.face_locations(imgS)
-            encodeCurFrame = face_recognition.face_encodings(imgS, faceCurFrame)
+            encodeCurFrame = face_recognition.face_encodings(imgS, faceCurFrame, model="cnn")
             if len(faceCurFrame) == 0:
                 if self.detect_status == 0:
                     self.nofaceLabel.place(x=185, y=530)

@@ -6,11 +6,7 @@ import time
 from ImageConvertResult import LoginBg
 import base64
 from io import BytesIO
-from sys import platform
-if platform == "darwin":
-    from tkmacosx import Button
-else:
-    from tkinter import Button
+from tkmacosx import Button
 
 from google.cloud import bigquery
 from google.oauth2 import service_account
