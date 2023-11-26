@@ -1,4 +1,4 @@
-/geo.csv
+pytorch
 /.idea
 *.png
 *.jpg
@@ -17,3 +17,5 @@ dist
 *.mov
 unmanshop
 *.zip
+torchvision
+*.whl
