@@ -6,11 +6,7 @@ import tkinter.messagebox
 from ImageConvertResult import ObjectDetectionBg
 import base64
 from io import BytesIO
-from sys import platform
-if platform == "darwin":
-    from tkmacosx import Button
-else:
-    from tkinter import Button
+from tkmacosx import Button
 import cv2
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
@@ -51,6 +47,7 @@ class ObjectDetectionPage(tk.Frame):
         self.TotalPrice = None
         self.purchase_button = None
         self.upload_count = 0
+        self.purchase_image = None
 
         credentials = service_account.Credentials.from_service_account_file('./unmannedshop-3444ca55864c.json')
         project_id = PROJECT_ID
@@ -229,6 +226,7 @@ class ObjectDetectionPage(tk.Frame):
                         img_t = cv2.putText(img_t, class_list[cls], org, font, fontScale, bgr_color, thickness)
                         img = Image.fromarray(img_t)
                         img = img.resize((video_width, video_height), Image.ANTIALIAS)
+                        self.purchase_image = img
 
                 photo = ImageTk.PhotoImage(image=img)
                 # solution for bug in `PhotoImage`
@@ -314,7 +312,7 @@ class ObjectDetectionPage(tk.Frame):
             self.retake_button.place(x=400, y=680)
 
             ## Model Predict ##
-            results = model(image, verbose=False, stream=True)
+            results = model(image, verbose=False, stream=True, device = "0")
             video_width = 600
             video_height = 540
             # Items' coordinates
@@ -343,6 +341,7 @@ class ObjectDetectionPage(tk.Frame):
                     img_t = cv2.putText(img_t, class_list[cls], org, cv2.FONT_HERSHEY_SIMPLEX, 0.75, bgr_color, 2)
                     img = Image.fromarray(img_t)
                     image = img.resize((video_width, video_height), Image.ANTIALIAS)
+                    self.purchase_image = image
 
             photo = ImageTk.PhotoImage(image=image)
             self.canvas.create_image(0, 0, anchor="nw", image=photo)
@@ -386,7 +385,6 @@ class ObjectDetectionPage(tk.Frame):
     def ConfirmPurchase(self):
         from LoginPage import login_user_ID
         order_id = str(uuid1())
-        order_item_id = str(uuid1())
         today = datetime.datetime.now().date().strftime("%Y-%m-%d")
         add_order_query = f"""
         INSERT INTO unmannedshop.TestOrderHistory (order_id, user_id, order_date, total_price)
@@ -412,6 +410,7 @@ class ObjectDetectionPage(tk.Frame):
         self.upload_count = 0
         self.retake()
         self.TotalPrice.place_forget()
+        self.purchase_image.save(f"./purchase_images/{order_id}_front.png", format = "PNG")
         self.controller.show_finish_purchase_page()
 
     def logout(self):
