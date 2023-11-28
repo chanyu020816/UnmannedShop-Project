@@ -10,6 +10,7 @@
 7. google-cloud-bigquery >= 3.13.0
 8. tkmacosx
 9. numpy
+10. google-api-python-client
 
 ## Pytorch & CUDA Setup on Jetson Orin Nano
 ```shell
