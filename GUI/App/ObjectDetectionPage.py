@@ -10,7 +10,7 @@ from tkmacosx import Button
 import cv2
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
-from camera import cap
+from camera import ObjectCamFront
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from constant import *
@@ -18,6 +18,7 @@ from numpy import array
 from ultralytics import YOLO
 import datetime
 from uuid import uuid1
+from DriveUpload import activateService, upload2Drive
 model = YOLO("./weights/best.pt")
 
 class ObjectDetectionPage(tk.Frame):
@@ -47,9 +48,9 @@ class ObjectDetectionPage(tk.Frame):
         self.TotalPrice = None
         self.purchase_button = None
         self.upload_count = 0
-        self.purchase_image = None
+        self.purchase_image = None ##
 
-        credentials = service_account.Credentials.from_service_account_file('./unmannedshop-3444ca55864c.json')
+        credentials = service_account.Credentials.from_service_account_file('./unmannedshop.json')
         project_id = PROJECT_ID
         self.client = bigquery.Client(credentials=credentials, project=project_id)
 
@@ -175,7 +176,7 @@ class ObjectDetectionPage(tk.Frame):
             if self.nothing_found:
                 self.nothing_found.place_forget()
             # get frame
-            ret, frame = cap.read()
+            ret, frame = ObjectCamFront.read()
             # Set the desired capture width and height
             video_width = 600
             video_height = 540
@@ -226,7 +227,7 @@ class ObjectDetectionPage(tk.Frame):
                         img_t = cv2.putText(img_t, class_list[cls], org, font, fontScale, bgr_color, thickness)
                         img = Image.fromarray(img_t)
                         img = img.resize((video_width, video_height), Image.ANTIALIAS)
-                        self.purchase_image = img
+                        self.purchase_image = img ##
 
                 photo = ImageTk.PhotoImage(image=img)
                 # solution for bug in `PhotoImage`
@@ -248,7 +249,7 @@ class ObjectDetectionPage(tk.Frame):
         self.capturing = True
 
         # Capture a frame
-        ret, frame = cap.read()
+        ret, frame = ObjectCamFront.read()
         if ret:
             flipped_frame = cv2.flip(frame, 1)
             # Convert the captured frame to a PhotoImage
@@ -341,7 +342,7 @@ class ObjectDetectionPage(tk.Frame):
                     img_t = cv2.putText(img_t, class_list[cls], org, cv2.FONT_HERSHEY_SIMPLEX, 0.75, bgr_color, 2)
                     img = Image.fromarray(img_t)
                     image = img.resize((video_width, video_height), Image.ANTIALIAS)
-                    self.purchase_image = image
+                    self.purchase_image = image ##
 
             photo = ImageTk.PhotoImage(image=image)
             self.canvas.create_image(0, 0, anchor="nw", image=photo)
@@ -408,10 +409,14 @@ class ObjectDetectionPage(tk.Frame):
         add_order_item_query_job = self.client.query(add_order_item_query)
         print(f"Order ID: {order_id} Complete")
         self.upload_count = 0
-        self.retake()
         self.TotalPrice.place_forget()
         self.purchase_image.save(f"./purchase_images/{order_id}_front.png", format = "PNG")
+        upload2Drive(self.myservice, f"{order_id}_front")
+        self.retake()
         self.controller.show_finish_purchase_page()
+
+    def connect_drive(self):
+        self.myservice = activateService()
 
     def logout(self):
         self.upload_count = 0
