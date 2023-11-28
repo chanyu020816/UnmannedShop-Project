@@ -11,7 +11,7 @@ import uuid
 from constant import *
 import constant
 import cv2
-from camera import cap
+from camera import FaceCam
 import cvzone
 import face_recognition
 import pickle
@@ -67,7 +67,7 @@ class LoginPage(tk.Frame):
         self.final_user_name_var.set('')
 
         # DataBase connection
-        credentials = service_account.Credentials.from_service_account_file('./unmannedshop-3444ca55864c.json')
+        credentials = service_account.Credentials.from_service_account_file('./unmannedshop.json')
         project_id = PROJECT_ID
         self.client = bigquery.Client(credentials=credentials, project=project_id)
 
@@ -209,7 +209,7 @@ class LoginPage(tk.Frame):
             return
         self.image_id = 0
         # get frame
-        ret, frame = cap.read()
+        ret, frame = FaceCam.read()
         video_width = 380
         video_height = 300
 

@@ -1,3 +1,4 @@
 import cv2
 
-cap = cv2.VideoCapture(0)
+FaceCam = cv2.VideoCapture(0)
+ObjectCamFront = cv2.VideoCapture(1)

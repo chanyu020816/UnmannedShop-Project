@@ -16,7 +16,7 @@ from AddFaceEncode import EncodeImages
 import cv2
 import cvzone
 from os import listdir
-from camera import cap
+from camera import FaceCam
 from face_recognition import face_locations
 
 class CreateAccountPage(tk.Frame):
@@ -171,7 +171,7 @@ class CreateAccountPage(tk.Frame):
         today = datetime.datetime.now().date().strftime("%Y-%m-%d")
 
         # Connect to BigQuery DataBase
-        credentials = service_account.Credentials.from_service_account_file('./unmannedshop-3444ca55864c.json')
+        credentials = service_account.Credentials.from_service_account_file('./unmannedshop.json')
         project_id = PROJECT_ID
         client = bigquery.Client(credentials=credentials, project=project_id)
 
@@ -310,7 +310,7 @@ class CreateAccountPage(tk.Frame):
         self.image_id = 0
         if self.captured_image is None:
 
-            ret, frame = cap.read()
+            ret, frame = FaceCam.read()
             # Set the desired capture width and height
             video_width = 480
             video_height = 440
@@ -368,7 +368,7 @@ class CreateAccountPage(tk.Frame):
         self.capturing = True
 
         # Capture a frame
-        ret, frame = cap.read()
+        ret, frame = FaceCam.read()
         if ret:
             flipped_frame = cv2.flip(frame, 1)
             # Convert the captured frame to a PhotoImage

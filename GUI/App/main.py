@@ -28,6 +28,7 @@ class MainView(tk.Tk):
 
     def Initial(self):
         self.pages["LoginPage"].grid(row=0, column=0, sticky="nsew")
+        self.pages["ObjectDetectionPage"].connect_drive()
 
     def show_create_account_page(self):
         self.pages["CreateAccountPage"].grid(row=0, column=0, sticky="nsew")
