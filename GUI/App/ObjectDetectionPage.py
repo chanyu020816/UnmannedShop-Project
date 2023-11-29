@@ -10,7 +10,7 @@ from tkmacosx import Button
 import cv2
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
-from camera import ObjectCamFront
+from camera import ObjectCamFront, FaceCam # ObjectCamBack
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from constant import *
@@ -49,6 +49,11 @@ class ObjectDetectionPage(tk.Frame):
         self.purchase_button = None
         self.upload_count = 0
         self.purchase_image = None ##
+        self.BackResults = None
+        self.model_result_back_dict = None
+        self.ItemCheck = ItemCheck
+        self.purchase_image_back = None
+        self.ItemNotSame = None
 
         credentials = service_account.Credentials.from_service_account_file('./unmannedshop.json')
         project_id = PROJECT_ID
@@ -64,12 +69,11 @@ class ObjectDetectionPage(tk.Frame):
     def create_object_detection_page(self):
 
         style = ttk.Style()
-        # style.theme_use('clam')
         style.configure("Treeview", fieldbackground="#FFFFFF", foreground="#000000",
             background="#FFFFFF", rowheight=28)
         style.configure("Treeview.Heading", font=("Open Sans", 20, 'bold'), background="#ECD7AA", foreground="#4f4e4d")
 
-        # Object Detection Result
+        # Object Detection Results Table
         self.table = ttk.Treeview(self, columns=('item_id', 'item_name', 'item_num', 'total_price'), show='headings',
             style="Treeview")
         self.table.heading("#0", text="qwer")
@@ -134,7 +138,7 @@ class ObjectDetectionPage(tk.Frame):
         #self.show_frame(canvas)
 
     def Display(self):
-
+        # 從登入頁面取得使用者資訊
         from LoginPage import login_user_name, login_user_ID
         if self.showInfo_button:
             self.showInfo_button.place_forget()
@@ -162,12 +166,30 @@ class ObjectDetectionPage(tk.Frame):
             if len(self.model_result) == 0:
                 self.nothing_found = tk.Label(self, text="No Item Detected", font=("Canva Sans", 35, "bold"),
                     bg="#FFF3F3", fg="#DF3F3F")
-                self.nothing_found.place(x=880, y=220)
+                self.nothing_found.place(x=860, y=220)
             else:
                 self.upload_count += 1
                 if self.nothing_found is not None:
                     self.nothing_found.place_forget()
-                self.DisplayItems()
+                if self.ItemNotSame is not None:
+                    self.ItemNotSame.place_forget()
+                if self.ItemCheck:
+                    item_counts = {}
+                    for item in self.model_result:
+                        if item in item_counts:
+                            item_counts[item] += 1
+                        else:
+                            item_counts[item] = 1
+                    if self.model_result_back_dict == item_counts:
+                        self.DisplayItems()
+                    else:
+                        self.ItemNotSame = tk.Label(self, text="Detect Items Stacked", font=("Canva Sans", 35, "bold"),
+                                                      bg="#FFF3F3", fg="#DF3F3F")
+                        self.ItemNotSame.place(x=860, y=220)
+                else:
+                    if self.ItemNotSame is not None:
+                        self.ItemNotSame.place_forget()
+                    self.DisplayItems()
 
 
         else:
@@ -247,7 +269,6 @@ class ObjectDetectionPage(tk.Frame):
 
     def capture(self):
         self.capturing = True
-
         # Capture a frame
         ret, frame = ObjectCamFront.read()
         if ret:
@@ -255,21 +276,73 @@ class ObjectDetectionPage(tk.Frame):
             # Convert the captured frame to a PhotoImage
             img = cv2.cvtColor(flipped_frame, cv2.COLOR_BGR2RGB)
             self.captured_image = ImageTk.PhotoImage(image=Image.fromarray(img))
-
+        if self.ItemCheck:
+            self.captureBack()
         self.capturing = False
         self.TakeImage_button.place_forget()
         self.retake_button.place(x=400, y=680)
+
+    def captureBack(self):
+        ret, frame = FaceCam.read()
+        video_width = 600
+        video_height = 540
+
+        if ret:
+            # Convert the captured frame to a PhotoImage
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            flipped_frame = cv2.flip(frame, 1)
+            # convert to PIL image
+            img = Image.fromarray(flipped_frame)
+
+            img = img.resize((video_width, video_height), Image.ANTIALIAS)
+            # Convert to Tkinter image
+            ## Model Predict ##
+            BackResults = model(img, verbose=False, stream=True)
+            model_result_back = []
+            for r in BackResults:
+                # print(random.randint(1, 1))
+                boxes = r.boxes
+                model_result_back = []
+                for box in boxes:
+                    # class name
+                    cls = int(box.cls[0])
+                    model_result_back.append(class_list[cls])
+                    # bounding box
+                    x1, y1, x2, y2 = box.xyxy[0]
+                    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                    # put box in cam
+                    # Convert a hex color to BGR
+                    hex_color = color_list[cls]
+                    bgr_color = tuple(int(hex_color[i:i + 2], 16) for i in (1, 3, 5))
+                    img_t = cv2.rectangle(array(img), (x1, y1), (x2, y2), bgr_color, thickness=2)
+                    org = [x1, y1]
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    fontScale = 0.75
+                    thickness = 2
+
+                    img_t = cv2.putText(img_t, class_list[cls], org, font, fontScale, bgr_color, thickness)
+                    img = Image.fromarray(img_t)
+                    img = img.resize((video_width, video_height), Image.ANTIALIAS)
+                    self.purchase_image_back = img  ##
+            self.model_result_back_dict = {}
+            for item in model_result_back:
+                if item in self.model_result_back_dict:
+                    self.model_result_back_dict[item] += 1
+                else:
+                    self.model_result_back_dict[item] = 1
 
     def stop_show_frame(self):
         self.running_object_detect_frame = False
         self.canvas.place_forget()
 
     def resume_show_frame(self):
+        self.ItemCheck = ItemCheck
         self.running_object_detect_frame = True
         self.show_frame(self.canvas)
         self.canvas.place(x=80, y=130)
 
     def retake(self):
+        self.ItemCheck = ItemCheck
         for item in self.table.get_children():
             self.table.delete(item)
         if self.TotalPrice is not None:
@@ -298,7 +371,8 @@ class ObjectDetectionPage(tk.Frame):
             if self.TotalPrice is not None:
                 self.TotalPrice.place_forget()
             self.upload_count += 1
-
+        self.ItemCheck = False
+        self.purchase_image_back = None
         self.after(300)
         file_path = askopenfilename(filetypes=[('Jpg Files', '*.jpg'), ('PNG Files','*.png')])
         if file_path:
@@ -411,12 +485,18 @@ class ObjectDetectionPage(tk.Frame):
         self.upload_count = 0
         self.TotalPrice.place_forget()
         self.purchase_image.save(f"./purchase_images/{order_id}_front.png", format = "PNG")
-        upload2Drive(self.myservice, f"{order_id}_front")
+        if self.purchase_image_back is not None:
+            self.purchase_image_back.save(f"./purchase_images/{order_id}_back.png", format = "PNG")
+        if UploadDrive:
+            upload2Drive(self.myservice, f"{order_id}_front")
+            if self.purchase_image_back is not None:
+                upload2Drive(self.myservice, f"{order_id}_back")
         self.retake()
         self.controller.show_finish_purchase_page()
 
     def connect_drive(self):
-        self.myservice = activateService()
+        if UploadDrive:
+            self.myservice = activateService()
 
     def logout(self):
         self.upload_count = 0
