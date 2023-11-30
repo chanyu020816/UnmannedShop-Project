@@ -36,11 +36,13 @@ class LoginPage(tk.Frame):
         byte_data = base64.b64decode(LoginFaceDetectPageBg)
         image_data = BytesIO(byte_data)
 
-        # set windows size
+        # set windows' size
         self.bg_frame = Image.open(image_data)
         desired_width = 1400
         desired_height = 800
+        # Resize bg image to windows' size
         resized_bg = self.bg_frame.resize((desired_width, desired_height), Image.ANTIALIAS)
+        # setup bg image
         photo = ImageTk.PhotoImage(resized_bg)
         self.bg_panel = tk.Label(self, image=photo)
         self.bg_panel.image = photo
@@ -63,17 +65,15 @@ class LoginPage(tk.Frame):
         self.grid_propagate(False)
         self.grid()
 
-        self.final_user_name_var = tk.StringVar()
-        self.final_user_name_var.set('')
-
         # DataBase connection
         credentials = service_account.Credentials.from_service_account_file('./unmannedshop.json')
         project_id = PROJECT_ID
         self.client = bigquery.Client(credentials=credentials, project=project_id)
 
-        # main page
+        # start login page
         self.create_login_page()
 
+    # defint login page
     def create_login_page(self):
         ## TITLE ##
         UserLogin_Title = tk.Label(self, text = "User    Login", font=("Canva Sans", 35, "bold"),
@@ -87,6 +87,7 @@ class LoginPage(tk.Frame):
         self.canvas = tk.Canvas(self, bg="#FFFFFF", bd=0, borderwidth=0, border=0, relief="solid", width=350, highlightthickness=0)
         self.canvas.place(x=180, y=220)
 
+        # Define unDeteced, no face detected, and unknown face notification label
         self.UnDetectedLabel = tk.Label(self, text="In the process of facial recognition...",
                                         font=("yu gothic ui", 21, "bold"), bg="#FFFFFF", fg="#4f4e4d")
         self.nofaceLabel = tk.Label(self, text="No face detected.",
@@ -95,13 +96,12 @@ class LoginPage(tk.Frame):
 
         self.unknownLabel = tk.Label(self, text="Unknown User. Please register first.",
                                         font=("yu gothic ui", 21, "bold"), bg="#FFFFFF", fg="#4f4e4d")
-        #if self.detect_status == 0:
-        #    self.UnDetectedLabel.place(x=185, y=550)
 
         ## USERNAME ##
         username_label = tk.Label(self, text="Username / Email", bg="#FFF3F3", fg="#4f4e4d",
                                     font=("yu gothic ui", 20, "bold"))
         username_label.place(x = 780, y = 210)
+        # save username input
         username = tk.StringVar()
         self.username_entry = tk.Entry(self, highlightthickness=0, relief='flat', bg="#F89B9B", fg="#000000",
             font=("Helvetica", 18, "bold"), insertbackground = '#6b6a69', borderwidth=7, textvariable=username)
@@ -111,43 +111,46 @@ class LoginPage(tk.Frame):
         password_label = tk.Label(self, text="Password", bg="#FFF3F3", fg="#4f4e4d",
                                     font=("yu gothic ui", 20, "bold"))
         password_label.place(x = 780, y = 290)
+        # save password input
         password = tk.StringVar()
         self.password_entry = tk.Entry(self, highlightthickness=0, relief='flat', bg="#F89B9B", fg="#000000",
                                     font=("yu gothic ui ", 18), insertbackground='#6b6a69', borderwidth=7,
                                     textvariable=password, show="*")
         self.password_entry.place(x = 780, y = 330, width = 550, height = 30)
 
+        ## Create Account Button ##
         create_account_button = Button(self, text="Create   Account", command=self.toCreateAccountPage, padx = 10, pady = 8,
             bg = "#DF3F3F", bd = 0, font = ("Open Sans", 20, "bold"), activebackground = "#FF3A3A",
             activeforeground = "white", fg = "white", highlightthickness = 0, borderwidth = 0, highlightcolor="#FFF3F3",
             highlightbackground="#FFF3F3", width = 250)
         create_account_button.place(x=780, y=600)
 
+        ## Login Button ##
         submit_button = Button(self, text="Login", command= lambda: self.submit(username, password), padx=10, pady=8,
             bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"), activebackground="#FF3A3A",
             activeforeground="white", fg="white", highlightthickness=0, borderwidth=0, highlightcolor="#FFF3F3",
             highlightbackground="#FFF3F3", width=250)
         submit_button.place(x=1080, y=600)
 
+        ## Reset Face Recognition Button $$
         self.resetFD_button = Button(self, text="Reset", command=self.resetFD,
             padx=10, pady=8, bg="#DF3F3F", bd=0, font=("Open Sans", 20, "bold"),
             activebackground="#FF3A3A", activeforeground="white", fg="white", highlightthickness=0, borderwidth=0,
             highlightcolor="#FFF3F3", highlightbackground="#FFF3F3", width=250, height=40)
 
-
+        # display webcam
         self.show_frame(self.canvas)
 
     def submit(self, username, password):
+        # get user input
         username_input = username.get()
         password_input = password.get()
 
-
-        # if "@" in the username_input, it is email
+        # if "@" in the username_input -> email, else -> username
         if "@" in username_input:
             # search by email
             ps_query = f"SELECT * FROM unmannedshop.TestUserInfoFull WHERE email = '{username_input}';"
         else:
-            # final_user_name = username_input
             # search by username
             ps_query = f"SELECT * FROM unmannedshop.TestUserInfoFull WHERE username = '{username_input}';"
 
@@ -164,6 +167,7 @@ class LoginPage(tk.Frame):
                 self.user_not_found_label.place_forget()
             self.user_not_found_label = tk.Label(self, text="Username or Email not found, please try again.",
                 bg="#FFF3F3", fg="red", font=("Open Sans", 18))
+            # display user not found label
             self.user_not_found_label.place(x=783, y=360)
         else:
             # clear the "User not found" label if it exists
