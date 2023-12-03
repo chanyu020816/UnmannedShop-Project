@@ -47,6 +47,7 @@ class CreateAccountPage(tk.Frame):
         self.capturing = False
         self.running_capture_photo_frame = False
         self.retake_button = None
+        self.image_frame = None
 
         # Set up the frame's dimensions
         self.configure(width=1400, height=800)
@@ -289,7 +290,9 @@ class CreateAccountPage(tk.Frame):
             self.birthdate_entry.delete(0, 'end')
 
             # If the user took the face picture, encode the image into face recognition model
-            if len(listdir("./new_faces_images")) != 0:
+            if self.image_frame is not None:
+                cv2.imwrite(f"./new_faces_images/new.jpg", self.image_frame)
+            # if len(listdir("./new_faces_images")) != 0:
                 EncodeImages(username_input)
             # Return to login page
             self.after(5000, self.controller.AfterSignUpAccount_show_login_page())
@@ -304,7 +307,6 @@ class CreateAccountPage(tk.Frame):
             return True
 
     def show_frame(self, canvas):
-
         if not self.running_capture_photo_frame:
             return
         self.image_id = 0
@@ -373,9 +375,9 @@ class CreateAccountPage(tk.Frame):
             flipped_frame = cv2.flip(frame, 1)
             # Convert the captured frame to a PhotoImage
             img = cv2.cvtColor(flipped_frame, cv2.COLOR_BGR2RGB)
-
+            self.image_frame = flipped_frame
             # Save the image to new_faces_images
-            cv2.imwrite(f"./new_faces_images/new.jpg", flipped_frame)
+            # cv2.imwrite(f"./new_faces_images/new.jpg", flipped_frame)
             # Display the image taken
             self.captured_image = ImageTk.PhotoImage(image=Image.fromarray(img))
 
@@ -386,8 +388,13 @@ class CreateAccountPage(tk.Frame):
 
     def stop_show_frame(self):
         # Stop Camera
+        self.image_frame = None
+        self.captured_image = None
         self.running_capture_photo_frame = False
         self.canvas.place_forget()
+        if self.retake_button:
+            self.retake_button.place_forget()
+            self.TakePict_button.place(x=160, y=630)
 
     def resume_show_frame(self):
         # Resume Camera
@@ -398,6 +405,7 @@ class CreateAccountPage(tk.Frame):
     def retake(self):
         # Retake image
         self.captured_image = None
+        self.image_frame = None
         self.resume_show_frame()
         if self.retake_button:
             self.retake_button.place_forget()
