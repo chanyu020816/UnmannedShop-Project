@@ -19,3 +19,4 @@ unmanshop
 *.zip
 torchvision
 *.whl
+*.DS_Store

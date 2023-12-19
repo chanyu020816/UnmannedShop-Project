@@ -245,7 +245,7 @@ class CreateAccountPage(tk.Frame):
                 self.birthdate_check_error.place_forget()
             if self.password_check_error:
                 self.password_check_error.place_forget()
-            self.birthdate_check_error = tk.Label(self, text="Enter correct Birthdate format", bg="#FFF3F3",
+            self.birthdate_check_error = tk.Label(self, text="Enter correct Birthdate format.", bg="#FFF3F3",
                 fg="red", font = ("Open Sans", 18))
             self.birthdate_check_error.place(x=780, y=610)
         else:
