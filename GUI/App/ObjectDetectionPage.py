@@ -492,6 +492,9 @@ class ObjectDetectionPage(tk.Frame):
             if self.purchase_image_back is not None:
                 upload2Drive(self.myservice, f"{order_id}_back")
         self.retake()
+        self.ShowUserInfoLabel.place_forget()
+        self.FaceDetectUserID.place_forget()
+        self.FaceDetectUserName.place_forget()
         self.controller.show_finish_purchase_page()
 
     def connect_drive(self):
@@ -502,3 +505,6 @@ class ObjectDetectionPage(tk.Frame):
         self.upload_count = 0
         self.retake()
         self.controller.show_login_page()
+        self.ShowUserInfoLabel.place_forget()
+        self.FaceDetectUserID.place_forget()
+        self.FaceDetectUserName.place_forget()
