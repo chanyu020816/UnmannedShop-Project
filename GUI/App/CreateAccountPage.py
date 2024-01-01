@@ -237,7 +237,7 @@ class CreateAccountPage(tk.Frame):
             self.password_check_error = tk.Label(self, text="Those passwords didn’t match. Try again.", bg="#FFF3F3",
                 fg="red", font=("Open Sans", 18))
             self.password_check_error.place(x=990, y=455)
-        elif self.is_valid_bigquery_date(birthdate_input):
+        elif self.isValidDate(birthdate_input):
             # Check user birthdate input is valid
             if self.username_check_error:
                 self.username_check_error.place_forget()
@@ -298,7 +298,7 @@ class CreateAccountPage(tk.Frame):
             self.after(5000, self.controller.AfterSignUpAccount_show_login_page())
 
 
-    def is_valid_bigquery_date(self, input_date):
+    def isValidDate(self, input_date) -> bool:
         # Check whether the user birthdate input is valid
         try:
             datetime.datetime.strptime(input_date, '%Y-%m-%d')
@@ -306,7 +306,7 @@ class CreateAccountPage(tk.Frame):
         except ValueError:
             return True
 
-    def show_frame(self, canvas):
+    def show_frame(self, canvas) -> None:
         if not self.running_capture_photo_frame:
             return
         self.image_id = 0
@@ -365,7 +365,7 @@ class CreateAccountPage(tk.Frame):
                 # run again after 20ms (0.02s)
                 self.after(20, self.show_frame, canvas)
 
-    def capture(self):
+    def capture(self) -> None:
         # capture image
         self.capturing = True
 
@@ -386,7 +386,7 @@ class CreateAccountPage(tk.Frame):
         # Replace TakePict Button with Retake Button
         self.retake_button.place(x=160, y=630)
 
-    def stop_show_frame(self):
+    def stop_show_frame(self) -> None:
         # Stop Camera
         self.image_frame = None
         self.captured_image = None
@@ -396,13 +396,13 @@ class CreateAccountPage(tk.Frame):
             self.retake_button.place_forget()
             self.TakePict_button.place(x=160, y=630)
 
-    def resume_show_frame(self):
+    def resume_show_frame(self) -> None:
         # Resume Camera
         self.running_capture_photo_frame = True
         self.show_frame(self.canvas)
         self.canvas.place(x=115, y=170)
 
-    def retake(self):
+    def retake(self) -> None:
         # Retake image
         self.captured_image = None
         self.image_frame = None
@@ -411,7 +411,7 @@ class CreateAccountPage(tk.Frame):
             self.retake_button.place_forget()
         self.TakePict_button.place(x=160, y=630)
 
-    def resetEntry(self):
+    def resetEntry(self) -> None:
         # Reset all entries
         self.email_entry.delete(0, 'end')
         self.username_entry.delete(0, 'end')
