@@ -345,7 +345,7 @@ class LoginPage(tk.Frame):
             self.unknowLabel.place_forget()
         self.resetFD_button.place_forget()
 
-    def toCreateAccountPage(self):
+    def toCreateAccountPage(self) -> None:
         # Go to Create Account Page
         # Reset all inputs
         self.resetFD()
