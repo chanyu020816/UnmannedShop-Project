@@ -237,7 +237,7 @@ class CreateAccountPage(tk.Frame):
             self.password_check_error = tk.Label(self, text="Those passwords didn’t match. Try again.", bg="#FFF3F3",
                 fg="red", font=("Open Sans", 18))
             self.password_check_error.place(x=990, y=455)
-        elif self.is_valid_bigquery_date(birthdate_input):
+        elif self.isValidDate(birthdate_input):
             # Check user birthdate input is valid
             if self.username_check_error:
                 self.username_check_error.place_forget()
@@ -298,7 +298,7 @@ class CreateAccountPage(tk.Frame):
             self.after(5000, self.controller.AfterSignUpAccount_show_login_page())
 
 
-    def is_valid_bigquery_date(self, input_date) -> bool:
+    def isValidDate(self, input_date) -> bool:
         # Check whether the user birthdate input is valid
         try:
             datetime.datetime.strptime(input_date, '%Y-%m-%d')
