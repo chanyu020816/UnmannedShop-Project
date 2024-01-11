@@ -297,7 +297,7 @@ class CreateAccountPage(tk.Frame):
             # Return to login page
             self.after(5000, self.controller.AfterSignUpAccount_show_login_page())
 
-
+            
     def is_valid_bigquery_date(self, input_date) -> bool:
         # Check whether the user birthdate input is valid
         try:
